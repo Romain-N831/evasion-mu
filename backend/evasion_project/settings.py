@@ -37,6 +37,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Evasion.mu apps
+    'users',
+    'hotels',
+    'activities',
+    'bookings',
+    'payments',
+    'reviews',
+    'wishlist',
 ]
 
 MIDDLEWARE = [
