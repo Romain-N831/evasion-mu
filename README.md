@@ -183,4 +183,8 @@ Current setup:
 - App-specific templates and static directories created
 - Django migrations configured
 - Git/GitHub workflow established
+<<<<<<< HEAD
 Database tables and application-specific models will be defined by the team during development.
+=======
+Database tables and application-specific models will be defined by the team during development.
+>>>>>>> 8ce1b03f47da2e93feb07013d239134819a895fc
