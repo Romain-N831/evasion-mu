@@ -9,6 +9,7 @@ class Review(models.Model):
         HIDDEN = "HIDDEN", "Hidden"
 
     customer = models.ForeignKey("users.Customer", on_delete=models.CASCADE, related_name="reviews")
+    hotel = models.ForeignKey("hotels.Hotel", on_delete=models.CASCADE, related_name="reviews", null=True, blank=True)
     activity = models.ForeignKey("activities.Activity", on_delete=models.CASCADE, related_name="reviews")
     rating = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     comment = models.TextField(blank=True)
