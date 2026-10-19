@@ -1,12 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evasion.mu | Discover Mauritius</title>
-</head>
-<body>
-    <h1>Welcome to Evasion.mu</h1>
-    <p>Discover hotels, activities and experiences in Mauritius.</p>
-</body>
-</html>
+
+{% extends "base.html" %}
+
+{% block title %}Home | Evasion.mu{% endblock %}
+
+{% block content %}
+    <section class="home-hero">
+        <h1>Welcome to Evasion.mu</h1>
+        <p>Discover hotels, activities and experiences in Mauritius.</p>
+    </section>
+{% endblock %}

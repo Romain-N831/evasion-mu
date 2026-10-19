@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'wishlist/css/wishlist.css' %}">
+{% endblock %}
+
+{% block title %}My Wishlist | Evasion.mu{% endblock %}
+
+{% block content %}
+<section class="wishlist-page">
+    <div class="wishlist-heading">
+        <div>
+            <h1>My Wishlist</h1>
+            <p>Keep track of the activities and stays you'd love to experience.</p>
+        </div>
+    </div>
+
+    {% if items %}
+        <div class="wishlist-grid">
+            {% for item in items %}
+                <article class="wishlist-card">
+                    {% if item.activity %}
+                        <div class="wishlist-card-content">
+                            <span class="wishlist-type">Activity</span>
+                            <h2>{{ item.activity.title }}</h2>
+                            <p>{{ item.activity.location }}</p>
+                            <p class="wishlist-price">
+                                Rs {{ item.activity.current_price }}
+                            </p>
+                        </div>
+                    {% elif item.room_type %}
+                        <div class="wishlist-card-content">
+                            <span class="wishlist-type">Room</span>
+                            <h2>{{ item.room_type.name }}</h2>
+                            <p>{{ item.room_type.hotel.name }}</p>
+                            <p class="wishlist-price">
+                                Rs {{ item.room_type.price_per_night }} / night
+                            </p>
+                        </div>
+                    {% endif %}
+
+                    <p class="wishlist-date">
+                        Added {{ item.date_added|date:"d M Y" }}
+                    </p>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="wishlist-empty">
+            <h2>Your wishlist is empty</h2>
+            <p>When you find an activity or room you love, save it here for later.</p>
+            <a href="{% url 'home' %}" class="wishlist-home-link">
+                Explore Mauritius
+            </a>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}Evasion.mu | Discover Mauritius{% endblock %}</title>
+
+    <!-- Shared stylesheet used by every page -->
+    <link rel="stylesheet" href="{% static 'core/css/base.css' %}">
+
+    <!-- Allows individual pages to load their own CSS -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header class="site-header">
+        <a href="{% url 'home' %}" class="site-logo">
+            <img
+                src="{% static 'core/images/evasion-logo.jpeg' %}"
+                alt="Evasion.mu logo"
+            >
+        </a>
+
+        <nav class="site-nav">
+            <a href="{% url 'home' %}">Home</a>
+            <a href="#">Hotels</a>
+            <a href="#">Activities</a>
+            <a href="#">About Us</a>
+        </nav>
+    </header>
+
+    <main class="site-main">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; {% now "Y" %} Evasion.mu. Discover Mauritius.</p>
+    </footer>
+</body>
+</html>
