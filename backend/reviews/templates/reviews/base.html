@@ -1,0 +1,101 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}Evasion.Mu{% end block %}</title>
+    <!-- {% blocksize %} - allows each page to define its own browser-tab title-->
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f5f7fa;
+            color: #222;
+        }
+
+        header {
+            background-color: #123b5d;
+            color: white;
+            padding: 18px 8%;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 16px;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+            min-height: 60vh;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #123b5d;
+            color: white;
+        }
+
+        .message {
+            padding: 12px;
+            margin-bottom: 15px;
+            background-color: #e8f4ff;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="/" style="font-size: 22px; font-weight: bold;">
+                Evasion.Mu
+            </a>
+
+            <div>
+                <a href="/">Home</a>
+                <a href="/admin/">Admin</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        {% if messages %} <!-- checks if django has messages to display-->
+            {% for message in messages %}
+                <div class="message">
+                    {{ message }} <!-- displays the message's text -->
+                </div>
+            {% end for %}
+        {% endif %}
+
+        {% block content %} <!-- {% block content %} - marks where each page's content will appear  -->
+        {% end block %}
+    </main>
+
+    <footer>
+        <p>&copy; {% now "Y" %} Evasion.Mu. All rights reserved.</p>
+        <!-- {% now "Y" %} - displays the current year automatically -->
+    </footer>
+</body>
+</html>
