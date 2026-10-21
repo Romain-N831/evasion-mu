@@ -3,7 +3,7 @@ from django.shortcuts import render
 def index(request):
     
     context = {
-        'Page_Title' : 'Bookings',
+        'page_title' : 'Bookings',
     }
     return render(request, 'bookings/home.html', context)
 
