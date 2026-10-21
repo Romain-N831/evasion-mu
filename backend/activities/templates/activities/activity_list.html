@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Activities | Evasion.mu{% endblock %}
+
+{% block content %}
+<section class="activities-page">
+    <h1>Discover Activities in Mauritius</h1>
+    <p>Explore experiences and activities for your next adventure.</p>
+
+    {% if activities %}
+        <div class="activities-list">
+            {% for activity in activities %}
+                <article class="activity-card">
+                    <h2>{{ activity.title }}</h2>
+
+                    <p>{{ activity.location }}</p>
+
+                    {% if activity.category %}
+                        <p>{{ activity.category }}</p>
+                    {% endif %}
+
+                    <p>{{ activity.description }}</p>
+
+                    <p>
+                        <strong>Rs {{ activity.current_price }}</strong>
+                    </p>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No activities are available at the moment. Please check again later.</p>
+    {% endif %}
+</section>
+{% endblock %}
