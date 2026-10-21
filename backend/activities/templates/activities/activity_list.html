@@ -1,34 +1,141 @@
-{% extends "base.html" %}
 
-{% block title %}Activities | Evasion.mu{% endblock %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Explore Activities | Evasion.mu{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'activities/css/activities.css' %}">
+{% endblock %}
 
 {% block content %}
 <section class="activities-page">
-    <h1>Discover Activities in Mauritius</h1>
-    <p>Explore experiences and activities for your next adventure.</p>
+
+    <div class="activities-hero">
+        <span class="hero-eyebrow">YOUR ISLAND ADVENTURE STARTS HERE</span>
+        <h1>Discover Mauritius</h1>
+        <p>From turquoise lagoons to mountain trails, find your next unforgettable experience.</p>
+    </div>
+
+    <div class="activities-toolbar">
+        <div>
+            <h2>Explore activities</h2>
+            <p>Find experiences worth remembering.</p>
+        </div>
+        <span class="results-count">
+            {{ activities|length }} experience{{ activities|length|pluralize }}
+        </span>
+    </div>
+
+    <form method="get" class="activity-filters">
+        <div class="search-field">
+            <label for="activity-search">Search activities</label>
+            <input
+                type="search"
+                id="activity-search"
+                name="q"
+                placeholder="Try hiking, Blue Bay..."
+                value="{{ search_query }}"
+            >
+        </div>
+
+        <div class="category-field">
+            <label for="activity-category">Category</label>
+            <select id="activity-category" name="category">
+                <option value="">All categories</option>
+                {% for category in categories %}
+                    <option value="{{ category }}"
+                        {% if selected_category == category %}selected{% endif %}>
+                        {{ category }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="filter-button">Find activities</button>
+        <a href="{% url 'activities:list' %}" class="reset-filter">Clear</a>
+    </form>
 
     {% if activities %}
-        <div class="activities-list">
+        <div class="activities-grid">
             {% for activity in activities %}
                 <article class="activity-card">
-                    <h2>{{ activity.title }}</h2>
 
-                    <p>{{ activity.location }}</p>
+                    <div class="activity-image">
+                        {% if activity.title == "Ile aux Cerfs Boat Trip" %}
+                            <img src="{% static 'activities/images/ile_aux_cerfs.jpg' %}" alt="{{ activity.title }}" loading="lazy">
+                        {% elif activity.title == "Dolphin Watching Excursion" %}
+                            <img src="{% static 'activities/images/Dolphin_watching.jpg' %}" alt="{{ activity.title }}" loading="lazy">
+                        {% elif activity.title == "Chamarel Seven Coloured Earth" %}
+                            <img src="{% static 'activities/images/chamarel.jpg' %}" alt="{{ activity.title }}" loading="lazy">
+                        {% elif activity.title == "Le Morne Guided Hike" %}
+                            <img src="{% static 'activities/images/Le_Morne.jpg' %}" alt="{{ activity.title }}" loading="lazy">
+                        {% elif activity.title == "Casela Nature Adventure" %}
+                            <img src="{% static 'activities/images/casela.jpg' %}" alt="{{ activity.title }}" loading="lazy">
+                        {% elif activity.title == "Blue Bay Snorkelling" %}
+                            <img src="{% static 'activities/images/Blue_Bay.jpg' %}" alt="{{ activity.title }}" loading="lazy">
+                        {% elif activity.title == "Northern Islands Cruise" %}
+                            <img src="{% static 'activities/images/Northen_Islands.jpg' %}" alt="{{ activity.title }}" loading="lazy">
+                        {% elif activity.title == "Port Louis Cultural Tour" %}
+                            <img src="{% static 'activities/images/Port_Louis.jpg' %}" alt="{{ activity.title }}" loading="lazy">
+                        {% else %}
+                            <div class="activity-placeholder">
+                                <span>{{ activity.category|default:"Experience" }}</span>
+                                <strong>{{ activity.location }}</strong>
+                            </div>
+                        {% endif %}
 
-                    {% if activity.category %}
-                        <p>{{ activity.category }}</p>
-                    {% endif %}
+                        {% if activity.category %}
+                            <span class="activity-badge">{{ activity.category }}</span>
+                        {% endif %}
+                    </div>
 
-                    <p>{{ activity.description }}</p>
+                    <div class="activity-card-content">
+                        <p class="activity-location">
+                            <span aria-hidden="true">⌖</span> {{ activity.location }}
+                        </p>
 
-                    <p>
-                        <strong>Rs {{ activity.current_price }}</strong>
-                    </p>
+                        <h3>{{ activity.title }}</h3>
+
+                        <p class="activity-description">
+                            {{ activity.description|default:"Discover a memorable experience in Mauritius." }}
+                        </p>
+
+                        <div class="activity-card-footer">
+                            <div class="activity-duration">
+                                <span>Duration</span>
+                                <strong>
+                                    {% if activity.duration_minutes >= 60 %}
+                                        {% widthratio activity.duration_minutes 60 1 %} hr
+                                        {% if activity.duration_minutes|divisibleby:60 %}
+                                        {% else %}
+                                            {{ activity.duration_minutes|add:"-60"|divisibleby:60|yesno:",," }}
+                                        {% endif %}
+                                    {% else %}
+                                        {{ activity.duration_minutes }} min
+                                    {% endif %}
+                                </strong>
+                            </div>
+
+                            <div class="activity-price">
+                                <span>From</span>
+                                <strong>Rs {{ activity.current_price|floatformat:2 }}</strong>
+                                <small>per person</small>
+                            </div>
+                        </div>
+                    </div>
+
                 </article>
             {% endfor %}
         </div>
     {% else %}
-        <p>No activities are available at the moment. Please check again later.</p>
+        <div class="activities-empty">
+            <span aria-hidden="true">🌴</span>
+            <h3>No activities found</h3>
+            <p>Try another search term or select a different category.</p>
+            <a href="{% url 'activities:list' %}">View all activities</a>
+        </div>
     {% endif %}
+
 </section>
 {% endblock %}

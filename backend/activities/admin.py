@@ -1,3 +1,6 @@
 from django.contrib import admin
+from .models import Activity, ActivitySlot, ActivityBlockedDate
 
-# Register your models here.
+admin.site.register(Activity)
+admin.site.register(ActivitySlot)
+admin.site.register(ActivityBlockedDate)
