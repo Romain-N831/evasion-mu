@@ -3,8 +3,7 @@ from django.contrib.auth.decorators import login_required
 # render -> combines a template with data and returns an HTML response
 # get_object_or_404 -> retrieves an object from the database. If it doesn't exist, Django returns a 404 error
 # redirect -> sends the user to another URL after an action
-import backend.reviews.models
-from backend.activities.models import Activity # imports the activity model so we can retrieve the activity being reviewed
+from activities.models import Activity # imports the activity model so we can retrieve the activity being reviewed
 from .models import Review # imports the Review model so we can retrieve and save reviews
 from .forms import ReviewForm # imports the form that collects a rating and comment
 # the '.' means the current Django app, which is reviews
@@ -17,7 +16,7 @@ def activity_reviews(request, activity_id): # displays approved reviews for an a
         activity=activity,
         moderation_status=Review.ModerationStatus.APPROVED # selects only reviews that have been approved
     )
-    return render(request, "reviews/activity_reviews.html", {
+    return render(request, "reviews/reviews.html", {
         "activity": activity,
         "reviews": reviews
     })

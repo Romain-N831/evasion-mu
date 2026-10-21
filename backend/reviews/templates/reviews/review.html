@@ -1,0 +1,60 @@
+
+{% extends "base.html" %} <!-- reuses  the team's existing page layout-->
+
+{% block title %}Activity Reviews | Evasion.Mu{% end block %}
+
+{% block content %}
+
+<div class="reviews-container">
+
+    <!-- Page heading -->
+    <h1>Reviews for {{ activity.title }}</h1> <!--displays the activity's title-->
+
+    <p>Read what other people think about this activity.</p>
+
+    <!-- Add review button -->
+    <div class="review-actions">
+        <a href="{% url 'add_review' activity.id %}">
+            Write a Review
+        </a>
+    </div>
+
+    <hr>
+
+    <!-- Display approved reviews -->
+    <section class="reviews-list">
+
+        {% for review in reviews %} <!--loops through the approved reviews passed by the view-->
+
+            <article class="review-card">
+
+                <h3>{{ review.rating }}/5</h3>  <!--displays the rating out of 5-->
+
+                <p>{{ review.comment|default:"No comment provided." }}</p>
+                <!--shows a fallback if the comment is empty-->
+
+                <small>
+                    Posted on {{ review.created_at|date:"d M Y" }}
+                </small>
+
+            </article>
+
+            <hr>
+
+        {% empty %} <!--displays a message if there are no approved reviews-->
+
+            <p>No approved reviews yet.</p>
+            <p>Be the first to share your experience!</p>
+
+        {% end for %}
+
+    </section>
+
+    <!-- Return to activities -->
+    <div class="back-link">
+        <a href="/">Back to Home</a>
+    </div>
+
+</div>
+
+{% end block %} <!--closes the content block from the shared template-->
