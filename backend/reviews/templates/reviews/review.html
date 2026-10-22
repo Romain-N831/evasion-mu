@@ -1,48 +1,324 @@
 
-{% extends "base.html" %} <!-- reuses  the team's existing page layout-->
+{% extends "base.html" %}
+{% load static %}
 
-{% block title %}Activity Reviews | Evasion.Mu{% end block %}
+{% block title %}Reviews for {{ activity.title }} | Evasion.mu{% endblock %}
+
+{% block extra_css %}
+<style>
+    .reviews-page {
+        max-width: 1100px;
+        margin: 40px auto;
+        padding: 0 24px;
+        color: #20364a;
+    }
+
+    .activity-hero {
+        display: grid;
+        grid-template-columns: 1.1fr 1fr;
+        overflow: hidden;
+        background: white;
+        border-radius: 18px;
+        border: 1px solid #e0e7ed;
+        box-shadow: 0 8px 28px rgba(20, 50, 70, 0.06);
+    }
+
+    .activity-image {
+        width: 100%;
+        height: 100%;
+        min-height: 300px;
+        object-fit: cover;
+        background: #e7eff3;
+    }
+
+    .activity-info {
+        padding: 32px;
+        align-self: center;
+    }
+
+    .activity-category {
+        color: #397d91;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 13px;
+    }
+
+    .activity-info h1 {
+        font-size: 32px;
+        margin: 12px 0;
+    }
+
+    .activity-description {
+        color: #607080;
+        line-height: 1.7;
+    }
+
+    .activity-details {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin: 20px 0;
+        color: #506476;
+    }
+
+    .activity-price {
+        font-size: 22px;
+        font-weight: 700;
+        color: #28788d;
+    }
+
+    .write-review-btn {
+        display: inline-block;
+        background: #397d91;
+        color: white;
+        text-decoration: none;
+        padding: 13px 22px;
+        border-radius: 9px;
+        font-weight: 600;
+    }
+
+    .write-review-btn:hover {
+        background: #285f70;
+    }
+
+    .reviews-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin: 42px 0 20px;
+    }
+
+    .reviews-heading h2 {
+        margin: 0 0 6px;
+        font-size: 27px;
+    }
+
+    .rating-summary {
+        background: #e9f4f5;
+        padding: 15px 22px;
+        border-radius: 12px;
+        text-align: center;
+    }
+
+    .rating-number {
+        font-size: 25px;
+        font-weight: 700;
+    }
+
+    .stars {
+        color: #f3ae28;
+        letter-spacing: 2px;
+    }
+
+    .review-card {
+        background: white;
+        border: 1px solid #e1e8ee;
+        border-radius: 14px;
+        padding: 24px;
+        margin-bottom: 16px;
+    }
+
+    .review-rating {
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+
+    .review-comment {
+        line-height: 1.7;
+        color: #435568;
+        overflow-wrap: anywhere;
+    }
+
+    .review-date {
+        display: block;
+        margin-top: 16px;
+        color: #718096;
+        font-size: 14px;
+    }
+
+    .empty-reviews {
+        background: #edf5fa;
+        border: 1px solid #d7e7f3;
+        padding: 28px;
+        text-align: center;
+        border-radius: 14px;
+        color: #38566f;
+    }
+
+    @media (max-width: 700px) {
+        .activity-hero {
+            grid-template-columns: 1fr;
+        }
+
+        .activity-image {
+            height: 230px;
+            min-height: 0;
+        }
+
+        .activity-info {
+            padding: 24px;
+        }
+
+        .activity-info h1 {
+            font-size: 27px;
+        }
+
+        .reviews-heading {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
+<div class="reviews-page">
 
-<div class="reviews-container">
+    <!-- Activity information -->
+    <section class="activity-hero">
 
-    <!-- Page heading -->
-    <h1>Reviews for {{ activity.title }}</h1> <!--displays the activity's title-->
+        {% with title=activity.title|lower %}
+            {% if activity.image_url %}
+                <img
+                    class="activity-image"
+                    src="{{ activity.image_url }}"
+                    alt="{{ activity.title }}"
+                >
+            {% elif "blue bay" in title %}
+                <img class="activity-image"
+                    src="{% static 'activities/images/Blue_Bay.jpg' %}"
+                    alt="{{ activity.title }}">
+            {% elif "casela" in title %}
+                <img class="activity-image"
+                    src="{% static 'activities/images/casela.jpg' %}"
+                    alt="{{ activity.title }}">
+            {% elif "chamarel" in title %}
+                <img class="activity-image"
+                    src="{% static 'activities/images/chamarel.jpg' %}"
+                    alt="{{ activity.title }}">
+            {% elif "dolphin" in title %}
+                <img class="activity-image"
+                    src="{% static 'activities/images/Dolphin_watching.jpg' %}"
+                    alt="{{ activity.title }}">
+            {% elif "cerfs" in title %}
+                <img class="activity-image"
+                    src="{% static 'activities/images/ile_aux_cerfs.jpg' %}"
+                    alt="{{ activity.title }}">
+            {% elif "morne" in title %}
+                <img class="activity-image"
+                    src="{% static 'activities/images/Le_Morne.jpg' %}"
+                    alt="{{ activity.title }}">
+            {% elif "island" in title or "northern" in title %}
+                <img class="activity-image"
+                    src="{% static 'activities/images/Northen_Islands.jpg' %}"
+                    alt="{{ activity.title }}">
+            {% elif "port louis" in title %}
+                <img class="activity-image"
+                    src="{% static 'activities/images/Port_Louis.jpg' %}"
+                    alt="{{ activity.title }}">
+            {% else %}
+                <div class="activity-image"
+                    role="img"
+                    aria-label="No activity image available">
+                </div>
+            {% endif %}
+        {% endwith %}
 
-    <p>Read what other people think about this activity.</p>
 
-    <!-- Add review button -->
-        <a href="{% url 'add_review' activity.id %}">
-            Write a Review
-        </a>
+        <div class="activity-info">
 
-    <!-- Display approved reviews -->
+            {% if activity.category %}
+                <div class="activity-category">
+                    {{ activity.category }}
+                </div>
+            {% endif %}
+
+            <h1>{{ activity.title }}</h1>
+
+            <p class="activity-description">
+                {{ activity.description|default:"Discover this experience in Mauritius." }}
+            </p>
+
+            <div class="activity-details">
+                <span>📍 {{ activity.location }}</span>
+                <span>🕒 {{ activity.duration_minutes }} minutes</span>
+            </div>
+
+            <p class="activity-price">
+                Rs {{ activity.current_price|floatformat:2 }}
+            </p>
+
+            <a class="write-review-btn"
+               href="{% url 'add_review' activity.id %}">
+                Write a Review
+            </a>
+
+        </div>
+    </section>
+
+    <!-- Review summary -->
+    <section class="reviews-heading">
+        <div>
+            <h2>Visitor Reviews</h2>
+            <p>Discover what visitors think about this experience.</p>
+        </div>
+
+        <div class="rating-summary">
+            {% if average_rating != None %}
+                <div class="rating-number">
+                    {{ average_rating|floatformat:1 }}/5
+                </div>
+                <div class="stars" aria-label="Average rating">
+                    ★★★★★
+                </div>
+            {% else %}
+                <div class="rating-number">—/5</div>
+                <div>No ratings yet</div>
+            {% endif %}
+
+            <small>{{ total_reviews }} approved review{{ total_reviews|pluralize }}</small>
+        </div>
+    </section>
+
+    <!-- Individual reviews -->
     <section class="reviews-list">
 
-        {% for review in reviews %} <!--loops through the approved reviews passed by the view-->
-
+        {% for review in reviews %}
             <article class="review-card">
 
-                <h3>{{ review.rating }}/5</h3>  <!--displays the rating out of 5-->
+                <div class="review-rating">
+                    <span class="stars">
+                        {% for star in "12345" %}
+                            {% if forloop.counter <= review.rating %}
+                                ★
+                            {% else %}
+                                ☆
+                            {% endif %}
+                        {% endfor %}
+                    </span>
 
-                <p>{{ review.comment|default:"No comment provided." }}</p>
-                <!--shows a fallback if the comment is empty-->
+                    {{ review.rating }}/5
+                </div>
 
-                <small>
+                <p class="review-comment">
+                    {{ review.comment|default:"No written comment provided." }}
+                </p>
+
+                <small class="review-date">
                     Posted on {{ review.created_at|date:"d M Y" }}
                 </small>
 
             </article>
-
-        {% empty %} <!--displays a message if there are no approved reviews-->
-
-            <p>No approved reviews yet. Be the first to share your experience!</p>
-
-        {% end for %}
+        {% empty %}
+            <div class="empty-reviews">
+                <h3>No approved reviews yet</h3>
+                <p>Be the first to share your experience!</p>
+            </div>
+        {% endfor %}
 
     </section>
 
-</div> <!--closes the outer container-->
-
-{% end block %} <!--closes the content block from the shared template-->
+</div>
+{% endblock %}
