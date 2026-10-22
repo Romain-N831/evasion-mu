@@ -13,13 +13,9 @@
     <p>Read what other people think about this activity.</p>
 
     <!-- Add review button -->
-    <div class="review-actions">
         <a href="{% url 'add_review' activity.id %}">
             Write a Review
         </a>
-    </div>
-
-    <hr>
 
     <!-- Display approved reviews -->
     <section class="reviews-list">
@@ -39,22 +35,14 @@
 
             </article>
 
-            <hr>
-
         {% empty %} <!--displays a message if there are no approved reviews-->
 
-            <p>No approved reviews yet.</p>
-            <p>Be the first to share your experience!</p>
+            <p>No approved reviews yet. Be the first to share your experience!</p>
 
         {% end for %}
 
     </section>
 
-    <!-- Return to activities -->
-    <div class="back-link">
-        <a href="/">Back to Home</a>
-    </div>
-
-</div>
+</div> <!--closes the outer container-->
 
 {% end block %} <!--closes the content block from the shared template-->
