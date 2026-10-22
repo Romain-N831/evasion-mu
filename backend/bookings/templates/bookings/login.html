@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Log in | Evasion.mu{% endblock title %}
+
+{% block content %}
+    <h1>Log in</h1>
+    <p>Log in to view your bookings.</p>
+
+    {# Send the credentials to Django's LoginView using POST. #}
+    <form method="post" action="{% url 'bookings:login' %}">
+
+        {# Django checks this token to help prevent forged form submissions. #}
+        {% csrf_token %}
+
+        {# Display Django's username/password fields and validation errors. #}
+        {{ form.as_p }}
+
+        {# Preserve the protected page the visitor originally requested. #}
+        <input type="hidden" name="next" value="{{ next }}">
+
+        <button type="submit">Log in</button>
+    </form>
+
+    <p>
+        <a href="{% url 'bookings:index' %}">Back to bookings</a>
+    </p>
+{% endblock content %}

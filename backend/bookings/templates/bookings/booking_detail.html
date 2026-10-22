@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Booking {{ booking.pk }} | Evasion.mu{% endblock title %}
+
+{% block content %}
+    <h1>Booking {{ booking.pk }}</h1>
+
+    {# Display information from the overall Booking record. #}
+    <p>Status: {{ booking.get_status_display }}</p>
+    <p>Booked on: {{ booking.booking_date|date:"d M Y, H:i" }}</p>
+    <p>Reference: {{ booking.ticket_reference }}</p>
+    <p>Recorded total: MUR {{ booking.total_amount|floatformat:2 }}</p>
+
+    <h2>Activity reservations</h2>
+
+    {# "activity_reservations" is the related_name on Reservation.booking. #}
+    {# Django templates call the manager's all() method without parentheses. #}
+    {% for reservation in booking.activity_reservations.all %}
+        <section>
+            {# Follow Reservation -> ActivitySlot -> Activity. #}
+            <h3>{{ reservation.activity_slot.activity.title }}</h3>
+
+            <p>
+                Location:
+                {{ reservation.activity_slot.activity.location }}
+            </p>
+
+            <p>
+                Scheduled for:
+                {{ reservation.activity_slot.starts_at|date:"d M Y, H:i" }}
+            </p>
+
+            <p>Participants: {{ reservation.participant_count }}</p>
+
+            {# Use the price saved on the reservation, not today's activity price. #}
+            <p>
+                Price per participant:
+                MUR {{ reservation.unit_price|floatformat:2 }}
+            </p>
+        </section>
+    {% empty %}
+        <p>This booking has no activity reservations.</p>
+    {% endfor %}
+
+    <h2>Hotel reservations</h2>
+
+    {# "hotel_reservations" is the related_name on HotelReservation.booking. #}
+    {% for reservation in booking.hotel_reservations.all %}
+        <section>
+            <h3>{{ reservation.room_type.hotel.name }}</h3>
+
+            <p>Room type: {{ reservation.room_type.name }}</p>
+            <p>Check-in: {{ reservation.check_in|date:"d M Y" }}</p>
+            <p>Check-out: {{ reservation.check_out|date:"d M Y" }}</p>
+            <p>Number of rooms: {{ reservation.rooms_count }}</p>
+
+            <p>
+                Price per room per night:
+                MUR {{ reservation.price_per_night|floatformat:2 }}
+            </p>
+        </section>
+    {% empty %}
+        <p>This booking has no hotel reservations.</p>
+    {% endfor %}
+
+    <p>
+        <a href="{% url 'bookings:booking-list' %}">
+            Back to my bookings
+        </a>
+    </p>
+{% endblock content %}

@@ -4,5 +4,26 @@
 
 {% block content %}
     <h1>{{ page_title }}</h1>
-    <p>Welcome to the Evasion.mu bookings page.</p>
+    <p>View your booking history and reservation details.</p>
+
+    {# The authentication context processor supplies "user". #}
+    {% if user.is_authenticated %}
+        <p>You are logged in as {{ user.username }}.</p>
+
+        <p>
+            <a href="{% url 'bookings:booking-list' %}">
+                View my bookings
+            </a>
+        </p>
+
+        {# Logout changes the session, so submit it using POST. #}
+        <form method="post" action="{% url 'bookings:logout' %}">
+            {% csrf_token %}
+            <button type="submit">Log out</button>
+        </form>
+    {% else %}
+        <p>Please log in to view your bookings.</p>
+
+        <a href="{% url 'bookings:login' %}">Log in</a>
+    {% endif %}
 {% endblock content %}
