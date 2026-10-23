@@ -95,7 +95,14 @@
                             <span aria-hidden="true">⌖</span> {{ activity.location }}
                         </p>
 
-                        <h3>{{ activity.title }}</h3>
+                        <h3>
+                            <a
+                                class="activity-card-link"
+                                href="{% url 'activities:detail' activity.id %}"
+                            >
+                                {{ activity.title }}
+                            </a>
+                        </h3>
 
                         <p class="activity-description">
                             {{ activity.description|default:"Discover a memorable experience in Mauritius." }}
@@ -106,10 +113,11 @@
                                 <span>Duration</span>
                                 <strong>
                                     {% if activity.duration_minutes >= 60 %}
-                                        {% widthratio activity.duration_minutes 60 1 %} hr
+                                        {% widthratio activity.duration_minutes 60 1 as total_hours %}
                                         {% if activity.duration_minutes|divisibleby:60 %}
+                                            {{ total_hours }} hr
                                         {% else %}
-                                            {{ activity.duration_minutes|add:"-60"|divisibleby:60|yesno:",," }}
+                                            {{ activity.duration_minutes|add:"0"|floatformat:0 }} min
                                         {% endif %}
                                     {% else %}
                                         {{ activity.duration_minutes }} min

@@ -1,0 +1,223 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ activity.title }} | Evasion.mu{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'activities/css/activity_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="activity-detail-page">
+
+    <a href="{% url 'activities:list' %}" class="back-link">
+        &larr; Back to activities
+    </a>
+
+    <div class="activity-detail-layout">
+
+        <div class="activity-detail-main">
+
+            <div class="detail-image">
+                {% if activity.image_url %}
+                    <img src="{{ activity.image_url }}" alt="{{ activity.title }}">
+                {% elif activity.title == "Blue Bay Snorkelling" %}
+                    <img src="{% static 'activities/images/Blue_Bay.jpg' %}" alt="{{ activity.title }}">
+                {% elif activity.title == "Casela Nature Adventure" %}
+                    <img src="{% static 'activities/images/casela.jpg' %}" alt="{{ activity.title }}">
+                {% elif activity.title == "Chamarel Seven Coloured Earth" %}
+                    <img src="{% static 'activities/images/chamarel.jpg' %}" alt="{{ activity.title }}">
+                {% elif activity.title == "Ile aux Cerfs Boat Trip" %}
+                    <img src="{% static 'activities/images/ile_aux_cerfs.jpg' %}" alt="{{ activity.title }}">
+                {% elif activity.title == "Dolphin Watching Excursion" %}
+                    <img src="{% static 'activities/images/Dolphin_watching.jpg' %}" alt="{{ activity.title }}">
+                {% elif activity.title == "Le Morne Guided Hike" %}
+                    <img src="{% static 'activities/images/Le_Morne.jpg' %}" alt="{{ activity.title }}">
+                {% elif activity.title == "Northern Islands Cruise" %}
+                    <img src="{% static 'activities/images/Northen_Islands.jpg' %}" alt="{{ activity.title }}">
+                {% elif activity.title == "Port Louis Cultural Tour" %}
+                    <img src="{% static 'activities/images/Port_Louis.jpg' %}" alt="{{ activity.title }}">
+                {% else %}
+                    <div class="detail-image-placeholder">
+                        {{ activity.location }}
+                    </div>
+                {% endif %}
+
+                {% if activity.category %}
+                    <span class="detail-category">{{ activity.category }}</span>
+                {% endif %}
+            </div>
+
+            <div class="detail-description">
+                <p class="detail-eyebrow">DISCOVER MAURITIUS</p>
+
+                <h1>{{ activity.title }}</h1>
+
+                <p class="detail-location">
+                    <span aria-hidden="true">&#9906;</span>
+                    {{ activity.location }}
+                </p>
+
+                <p class="description-text">
+                    {{ activity.description|default:"Discover a memorable experience in Mauritius." }}
+                </p>
+
+                <div class="detail-facts">
+                    <div class="detail-fact">
+                        <span>Duration</span>
+                        <strong>{{ activity.duration_minutes }} minutes</strong>
+                    </div>
+
+                    <div class="detail-fact">
+                        <span>Minimum participants</span>
+                        <strong>{{ activity.min_participants }}</strong>
+                    </div>
+
+                    {% if activity.max_participants %}
+                        <div class="detail-fact">
+                            <span>Maximum participants</span>
+                            <strong>{{ activity.max_participants }}</strong>
+                        </div>
+                    {% endif %}
+                </div>
+                                <!-- Approved activity reviews -->
+                <section class="activity-reviews-preview"
+                         aria-labelledby="activity-reviews-heading">
+
+                    <div class="reviews-preview-heading">
+                        <div>
+                            <p class="detail-eyebrow">TRAVELLER FEEDBACK</p>
+                            <h2 id="activity-reviews-heading">
+                                Visitor reviews
+                            </h2>
+                        </div>
+
+                        {% if total_reviews > 0 %}
+                            <div class="reviews-preview-summary">
+                                <span class="reviews-preview-average">
+                                    {{ average_rating|floatformat:1 }}/5
+                                </span>
+                                <span class="reviews-preview-stars"
+                                      aria-label="Average rating out of five">
+                                    ★★★★★
+                                </span>
+                                <span class="reviews-preview-count">
+                                    {{ total_reviews }}
+                                    approved review{{ total_reviews|pluralize }}
+                                </span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {% if review_preview %}
+                        <div class="reviews-preview-list">
+                            {% for review in review_preview %}
+                                <article class="review-preview-card">
+
+                                    <div class="review-preview-rating">
+                                        <span class="reviews-preview-stars"
+                                              aria-label="{{ review.rating }} out of 5 stars">
+                                            {% for star in "12345" %}
+                                                {% if forloop.counter <= review.rating %}
+                                                    ★
+                                                {% else %}
+                                                    ☆
+                                                {% endif %}
+                                            {% endfor %}
+                                        </span>
+
+                                        <strong>{{ review.rating }}/5</strong>
+                                    </div>
+
+                                    <p class="review-preview-comment">
+                                        {{ review.comment|default:"No written comment provided."|truncatewords:30 }}
+                                    </p>
+
+                                    <span class="review-preview-date">
+                                        Posted {{ review.created_at|date:"d M Y" }}
+                                    </span>
+
+                                </article>
+                            {% endfor %}
+                        </div>
+
+                        <a class="reviews-show-more"
+                           href="{% url 'activity_reviews' activity.id %}">
+                            Show all {{ total_reviews }} reviews
+                            <span aria-hidden="true">&rarr;</span>
+                        </a>
+
+                    {% else %}
+                        <div class="reviews-preview-empty">
+                            <span aria-hidden="true">☆</span>
+                            <p>No approved reviews yet.</p>
+                            <span>Be the first to share your experience once you've taken part.</span>
+                        </div>
+                    {% endif %}
+
+                </section>
+            </div>
+
+        </div>
+
+        <aside class="activity-price-card">
+            <p class="price-card-eyebrow">YOUR NEXT ADVENTURE</p>
+
+            <span class="price-label">Price per person</span>
+
+            <p class="detail-price">
+                Rs {{ activity.current_price|floatformat:2 }}
+            </p>
+
+            <p class="price-note">
+                Experience the best of Mauritius.
+            </p>
+
+            <a href="{% url 'activities:list' %}" class="explore-button">
+                Explore more activities
+            </a>
+        </aside>
+
+        <section class="activity-availability">
+            <h2>Available dates and times</h2>
+            <p class="availability-intro">
+                Choose an upcoming session for your activity.
+            </p>
+
+            {% if available_slots %}
+                <div class="availability-list">
+                    {% for slot in available_slots %}
+                        <div class="availability-slot">
+                            <div class="slot-date">
+                                <strong>
+                                    {{ slot.starts_at|date:"D, d M Y" }}
+                                </strong>
+                                <span>
+                                    {{ slot.starts_at|date:"g:i A" }}
+                                </span>
+                            </div>
+
+                            <div class="slot-capacity">
+                                <strong>{{ slot.available_places }}</strong>
+                                <span>
+                                    place{{ slot.available_places|pluralize }} left
+                                </span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="availability-empty">
+                    <h3>No upcoming sessions available</h3>
+                    <p>
+                        Please check back later for new dates and times.
+                    </p>
+                </div>
+            {% endif %}
+        </section>
+
+    </div>
+
+</section>
+{% endblock %}
