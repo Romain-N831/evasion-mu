@@ -45,7 +45,7 @@ def add_review(request, activity_id): # allows a logged-in customer to submit a 
             review.activity = activity
             review.moderation_status = Review.ModerationStatus.PENDING # the review won't appear in the public list until it's approved
 
-            review.customer = request.user.customer
+            review.customer = request.user.customer_profile
             review.save() # save the review
 
             return redirect("activity_reviews", activity_id=activity.id)
