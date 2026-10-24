@@ -15,6 +15,17 @@ app_name = 'bookings'
 urlpatterns = [
     # Introductory page: /bookings/
     path('', views.index, name='index'),
+    
+    
+    # Activity booking form: /bookings/activity/5/
+    # activity_id identifies the activity the customer wants to book.
+    # Django passes this ID to the book_activity() function in views.py.
+    path(
+        'activity/<int:activity_id>/',
+        views.book_activity,
+        name='book-activity',
+    ),
+
 
     # Customer booking history: /bookings/my-bookings/
     path(

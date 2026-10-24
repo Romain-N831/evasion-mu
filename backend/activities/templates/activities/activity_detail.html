@@ -174,7 +174,17 @@
                 Experience the best of Mauritius.
             </p>
 
-            <a href="{% url 'activities:list' %}" class="explore-button">
+
+<!-- Allow customers to book this activity if sessions are available. -->
+{% if available_slots %}
+    <a href="{% url 'bookings:book-activity' activity.pk %}"
+       class="explore-button">
+        Book Now
+    </a>
+{% endif %}
+
+
+            <a href="{% url 'activities:list' %}" class="explore-button"  style="margin-top: 12px;">
                 Explore more activities
             </a>
         </aside>
