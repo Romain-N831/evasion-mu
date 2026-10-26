@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.db.models import Sum, Q, Avg, Count
 from django.utils import timezone
 
-from .models import Activity
+from .models import Activity, ActivityBlockedDate
 from reviews.models import Review
 
 
@@ -65,6 +65,11 @@ def activity_detail(request, activity_id):
     review_preview = approved_reviews.order_by(
         "-created_at"
     )[:3]
+    
+    # Retrieve dates blocked for this activity or all activities.
+    blocked_dates = ActivityBlockedDate.objects.filter(
+        Q(activity=activity) | Q(activity__isnull=True)
+    ).values_list("date", flat=True)    
 
     # Find upcoming sessions and calculate booked places.
     slots = (
@@ -72,6 +77,9 @@ def activity_detail(request, activity_id):
         .filter(
             is_active=True,
             starts_at__gte=timezone.now()
+        )
+        .exclude(
+            starts_at__date__in=blocked_dates
         )
         .annotate(
             booked_places=Sum(

@@ -1,71 +1,109 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}Booking {{ booking.pk }} | Evasion.mu{% endblock title %}
+{% block title %}Booking #{{ booking.pk }} | Evasion.mu{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'bookings/css/bookings.css' %}">
+{% endblock %}
 
 {% block content %}
-    <h1>Booking {{ booking.pk }}</h1>
+<section class="bookings-page">
+    <a class="bookings-back-link" href="{% url 'bookings:booking-list' %}">
+        &larr; Back to my bookings
+    </a>
 
-    {# Display information from the overall Booking record. #}
-    <p>Status: {{ booking.get_status_display }}</p>
-    <p>Booked on: {{ booking.booking_date|date:"d M Y, H:i" }}</p>
-    <p>Reference: {{ booking.ticket_reference }}</p>
-    <p>Recorded total: MUR {{ booking.total_amount|floatformat:2 }}</p>
+    <div class="bookings-detail-heading">
+        <div>
+            <span class="bookings-eyebrow">RESERVATION DETAILS</span>
+            <h1>Booking #{{ booking.pk }}</h1>
+            <p>Here is a summary of your reservation.</p>
+        </div>
+        <span class="bookings-status bookings-status-{{ booking.status|lower }}">
+            {{ booking.get_status_display }}
+        </span>
+    </div>
 
-    <h2>Activity reservations</h2>
+    <!-- Summary from the existing Booking record. -->
+    <div class="bookings-summary-grid">
+        <div class="bookings-summary-item">
+            <span>Booking reference</span>
+            <strong class="bookings-reference">{{ booking.ticket_reference }}</strong>
+        </div>
+        <div class="bookings-summary-item">
+            <span>Booked on</span>
+            <strong>{{ booking.booking_date|date:"d M Y, H:i" }}</strong>
+        </div>
+        <div class="bookings-summary-item">
+            <span>Total amount</span>
+            <strong class="bookings-summary-total">Rs {{ booking.total_amount|floatformat:2 }}</strong>
+        </div>
+    </div>
 
-    {# "activity_reservations" is the related_name on Reservation.booking. #}
-    {# Django templates call the manager's all() method without parentheses. #}
+    <h2 class="bookings-subheading">Activity reservations</h2>
+
+    <!-- Show activity reservations linked to this booking. -->
     {% for reservation in booking.activity_reservations.all %}
-        <section>
-            {# Follow Reservation -> ActivitySlot -> Activity. #}
+        <div class="bookings-card bookings-reservation-card">
             <h3>{{ reservation.activity_slot.activity.title }}</h3>
-
-            <p>
-                Location:
-                {{ reservation.activity_slot.activity.location }}
-            </p>
-
-            <p>
-                Scheduled for:
-                {{ reservation.activity_slot.starts_at|date:"d M Y, H:i" }}
-            </p>
-
-            <p>Participants: {{ reservation.participant_count }}</p>
-
-            {# Use the price saved on the reservation, not today's activity price. #}
-            <p>
-                Price per participant:
-                MUR {{ reservation.unit_price|floatformat:2 }}
-            </p>
-        </section>
+            <div class="bookings-info-grid">
+                <div class="bookings-info-item">
+                    <span>Location</span>
+                    <strong>{{ reservation.activity_slot.activity.location }}</strong>
+                </div>
+                <div class="bookings-info-item">
+                    <span>Date and time</span>
+                    <strong>{{ reservation.activity_slot.starts_at|date:"d M Y, H:i" }}</strong>
+                </div>
+                <div class="bookings-info-item">
+                    <span>Participants</span>
+                    <strong>{{ reservation.participant_count }}</strong>
+                </div>
+                <div class="bookings-info-item">
+                    <span>Price per participant</span>
+                    <strong>Rs {{ reservation.unit_price|floatformat:2 }}</strong>
+                </div>
+            </div>
+        </div>
     {% empty %}
-        <p>This booking has no activity reservations.</p>
+        <p class="bookings-muted">This booking has no activity reservations.</p>
     {% endfor %}
 
-    <h2>Hotel reservations</h2>
+    <h2 class="bookings-subheading">Hotel reservations</h2>
 
-    {# "hotel_reservations" is the related_name on HotelReservation.booking. #}
+    <!-- Keep hotel reservation details for existing mixed bookings. -->
     {% for reservation in booking.hotel_reservations.all %}
-        <section>
+        <div class="bookings-card bookings-reservation-card">
             <h3>{{ reservation.room_type.hotel.name }}</h3>
-
-            <p>Room type: {{ reservation.room_type.name }}</p>
-            <p>Check-in: {{ reservation.check_in|date:"d M Y" }}</p>
-            <p>Check-out: {{ reservation.check_out|date:"d M Y" }}</p>
-            <p>Number of rooms: {{ reservation.rooms_count }}</p>
-
-            <p>
-                Price per room per night:
-                MUR {{ reservation.price_per_night|floatformat:2 }}
-            </p>
-        </section>
+            <div class="bookings-info-grid">
+                <div class="bookings-info-item">
+                    <span>Room type</span>
+                    <strong>{{ reservation.room_type.name }}</strong>
+                </div>
+                <div class="bookings-info-item">
+                    <span>Check-in</span>
+                    <strong>{{ reservation.check_in|date:"d M Y" }}</strong>
+                </div>
+                <div class="bookings-info-item">
+                    <span>Check-out</span>
+                    <strong>{{ reservation.check_out|date:"d M Y" }}</strong>
+                </div>
+                <div class="bookings-info-item">
+                    <span>Number of rooms</span>
+                    <strong>{{ reservation.rooms_count }}</strong>
+                </div>
+                <div class="bookings-info-item">
+                    <span>Price per room per night</span>
+                    <strong>Rs {{ reservation.price_per_night|floatformat:2 }}</strong>
+                </div>
+            </div>
+        </div>
     {% empty %}
-        <p>This booking has no hotel reservations.</p>
+        <p class="bookings-muted">This booking has no hotel reservations.</p>
     {% endfor %}
 
-    <p>
-        <a href="{% url 'bookings:booking-list' %}">
-            Back to my bookings
-        </a>
-    </p>
-{% endblock content %}
+    <a class="bookings-button bookings-button-primary bookings-bottom-link" href="{% url 'bookings:booking-list' %}">
+        View my bookings
+    </a>
+</section>
+{% endblock %}

@@ -1,54 +1,77 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}My bookings | Evasion.mu{% endblock title %}
+{% block title %}My Bookings | Evasion.mu{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'bookings/css/bookings.css' %}">
+{% endblock %}
 
 {% block content %}
-    <h1>My bookings</h1>
-    <p>Bookings for {{ user.username }}.</p>
+<section class="bookings-page">
+    <div class="bookings-hero">
+        <span class="bookings-eyebrow">YOUR EVASION.MU JOURNEY</span>
+        <h1>My Bookings</h1>
+        <p>View your reservations, booking details and current status.</p>
+    </div>
 
-    {# Only show the table when the view has returned bookings. #}
+    <div class="bookings-section-heading">
+        <div>
+            <h2>Booking history</h2>
+            <p>Bookings for {{ user.username }}</p>
+        </div>
+        <span class="bookings-count">
+            {{ booking_list|length }} booking{{ booking_list|length|pluralize }}
+        </span>
+    </div>
+
     {% if booking_list %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Booking number</th>
-                    <th>Booking date</th>
-                    <th>Status</th>
-                    <th>Recorded total</th>
-                    <th>Details</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {# Display one table row for each permitted booking. #}
-                {% for booking in booking_list %}
-                    <tr>
-                        <td>{{ booking.pk }}</td>
-
-                        {# Format the date for display. #}
-                        <td>{{ booking.booking_date|date:"d M Y, H:i" }}</td>
-
-                        {# Show "Pending" instead of the stored value "PENDING". #}
-                        <td>{{ booking.get_status_display }}</td>
-
-                        {# Display the saved amount with two decimal places. #}
-                        <td>MUR {{ booking.total_amount|floatformat:2 }}</td>
-
-                        <td>
-                            {# Build a detail URL using this booking's ID. #}
-                            <a href="{% url 'bookings:booking-detail' booking.pk %}">
-                                View details
-                            </a>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="bookings-table-card">
+            <div class="bookings-table-scroll">
+                <table class="bookings-table">
+                    <thead>
+                        <tr>
+                            <th>Booking number</th>
+                            <th>Booking date</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in booking_list %}
+                            <tr>
+                                <td><strong>#{{ booking.pk }}</strong></td>
+                                <td>{{ booking.booking_date|date:"d M Y, H:i" }}</td>
+                                <td>
+                                    <span class="bookings-status bookings-status-{{ booking.status|lower }}">
+                                        {{ booking.get_status_display }}
+                                    </span>
+                                </td>
+                                <td class="bookings-amount">Rs {{ booking.total_amount|floatformat:2 }}</td>
+                                <td>
+                                    <a class="bookings-table-link" href="{% url 'bookings:booking-detail' booking.pk %}">
+                                        View details &rarr;
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     {% else %}
-        <p>You have no bookings yet.</p>
+        <div class="bookings-empty">
+            <h2>No bookings yet</h2>
+            <p>Your future adventures will appear here once you make a reservation.</p>
+            <a class="bookings-button bookings-button-primary" href="{% url 'activities:list' %}">
+                Explore activities
+            </a>
+        </div>
     {% endif %}
 
-    <p>
-        <a href="{% url 'bookings:index' %}">Back to bookings</a>
-    </p>
-{% endblock content %}
+    <a class="bookings-back-link bookings-bottom-link" href="{% url 'bookings:index' %}">
+        &larr; Back to bookings
+    </a>
+</section>
+{% endblock %}

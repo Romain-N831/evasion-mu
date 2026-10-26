@@ -1,101 +1,69 @@
-
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}
-Book {{ activity.title }} | Evasion.mu
+{% block title %}Book {{ activity.title }} | Evasion.mu{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'bookings/css/bookings.css' %}">
 {% endblock %}
 
 {% block content %}
+<section class="bookings-page">
+    <a class="bookings-back-link" href="{% url 'activities:detail' activity.pk %}">
+        &larr; Back to activity details
+    </a>
 
-<!-- Display information about the activity being booked. -->
-<section class="activity-booking-page">
+    <div class="bookings-heading">
+        <span class="bookings-eyebrow">YOUR NEXT ADVENTURE</span>
+        <h1>Book {{ activity.title }}</h1>
+        <p>Choose your preferred date and the number of participants.</p>
+    </div>
 
-    <h1>Book {{ activity.title }}</h1>
+    <div class="bookings-form-layout">
+        <!-- The existing Django form still handles all validation. -->
+        <div class="bookings-card">
+            <h2>Reservation details</h2>
+            <p class="bookings-muted">Please select an available session.</p>
 
-    <p>
-        Location: {{ activity.location }}
-    </p>
+            <form method="post" class="bookings-form">
+                {% csrf_token %}
 
-    <p>
-        Price per participant:
-        <strong>
-            Rs {{ activity.current_price|floatformat:2 }}
-        </strong>
-    </p>
+                {% if form.non_field_errors %}
+                    <div class="bookings-errors">{{ form.non_field_errors }}</div>
+                {% endif %}
 
-    <p>
-        Choose an available date and enter the number
-        of participants to make your reservation.
-    </p>
+                <div class="bookings-field">
+                    {{ form.activity_slot.label_tag }}
+                    {{ form.activity_slot }}
+                    {{ form.activity_slot.errors }}
+                </div>
 
-    <!-- Display the activity booking form. -->
-    <form method="post">
+                <div class="bookings-field">
+                    {{ form.participant_count.label_tag }}
+                    {{ form.participant_count }}
+                    {{ form.participant_count.errors }}
+                </div>
 
-        <!-- Protect the form against CSRF attacks. -->
-        {% csrf_token %}
+                <button type="submit" class="bookings-button bookings-button-primary">
+                    Confirm Booking
+                </button>
+            </form>
+        </div>
 
-        
-<!-- Display booking validation errors. -->
-<div style="color: red;">
-    {{ form.non_field_errors }}
-</div>
+        <!-- The final total is calculated securely in bookings/views.py. -->
+        <aside class="bookings-card bookings-price-card">
+            <span class="bookings-eyebrow">BOOKING SUMMARY</span>
+            <h2>{{ activity.title }}</h2>
+            <p class="bookings-muted">{{ activity.location }}</p>
 
-
-        <!-- Activity slot selection. -->
-        <p>
-            {{ form.activity_slot.label_tag }}
-            {{ form.activity_slot }}
-            {{ form.activity_slot.errors }}
-        </p>
-
-        <!-- Number of participants. -->
-        <p>
-            {{ form.participant_count.label_tag }}
-            {{ form.participant_count }}
-            {{ form.participant_count.errors }}
-        </p>
-
-        <!-- Display the estimated booking total. -->
-         <p>
-    <strong>
-        Total price: Rs <span id="total-price">0.00</span>
-    </strong>
-</p>
-
-        <!-- Submit the booking information to the view. -->
-        <button type="submit">
-            Confirm Booking
-        </button>
-
-    </form>
-
-    <!-- Return to the selected activity's detail page. -->
-    <p>
-        <a href="{% url 'activities:detail' activity.pk %}">
-            Back to activity details
-        </a>
-    </p>
-
+            <div class="bookings-price-row">
+                <span>Price per participant</span>
+                <strong>Rs {{ activity.current_price|floatformat:2 }}</strong>
+            </div>
+            <p class="bookings-price-note">
+                Your final total will be calculated when you confirm the booking.
+            </p>
+        </aside>
+    </div>
 </section>
-
-
-<script>
-    // Retrieve the activity's price from Django.
-    const price = Number("{{ activity.current_price }}");
-
-    // Get the participant input and total display.
-    const participants = document.getElementById("id_participant_count");
-    const total = document.getElementById("total-price");
-
-    // Update the total whenever the number of participants changes.
-    participants.addEventListener("input", function() {
-        const quantity = Number(participants.value);
-
-        // Total = price per participant × participants.
-        total.textContent = (
-            price * Math.max(0, quantity)
-        ).toFixed(2);
-    });
-</script>
-
 {% endblock %}
