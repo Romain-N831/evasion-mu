@@ -1,0 +1,71 @@
+
+{% extends "base.html" %}
+
+{% block title %}My Profile | Evasion.mu{% endblock %}
+
+{% block content %}
+<section class="container" style="max-width: 900px; margin: 40px auto; padding: 0 20px;">
+    <h1>My Profile</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <p role="status">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+
+    <h2>Personal details</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save changes</button>
+    </form>
+
+    <h2>Account settings</h2>
+    <p>
+        <a href="{% url 'users:password_change' %}">
+            Change password
+        </a>
+    </p>
+
+    <form method="post" action="{% url 'users:logout' %}">
+        {% csrf_token %}
+        <button type="submit">Log out</button>
+    </form>
+
+    <h2>Recent bookings</h2>
+    {% if recent_bookings %}
+        <ul>
+            {% for booking in recent_bookings %}
+                <li>
+                    Booking #{{ booking.pk }} —
+                    {{ booking.get_status_display }} —
+                    {{ booking.total_amount }}
+                    <a href="{% url 'bookings:booking-detail' booking.pk %}">
+                        View details
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+        <a href="{% url 'bookings:booking-list' %}">
+            View all my bookings
+        </a>
+    {% else %}
+        <p>You have no bookings yet.</p>
+    {% endif %}
+
+    <h2>Recent payments</h2>
+    {% if recent_payments %}
+        <ul>
+            {% for payment in recent_payments %}
+                <li>
+                    {{ payment.get_status_display }} —
+                    {{ payment.amount_paid }} —
+                    {{ payment.payment_date|date:"j M Y, H:i" }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No payments to display yet.</p>
+    {% endif %}
+</section>
+{% endblock %}
