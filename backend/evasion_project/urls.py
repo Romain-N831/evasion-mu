@@ -24,4 +24,6 @@ urlpatterns = [
     path('wishlist/', include('wishlist.urls')),
     path('bookings/', include('bookings.urls')),
     path('reviews/', include('reviews.urls')),
+    path('users/', include('users.urls')),
+    path('payments/', include('payments.urls')),
 ]

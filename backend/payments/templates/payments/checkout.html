@@ -1,0 +1,32 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Booking Checkout</h1>
+
+    <div class="card mt-3">
+        <div class="card-body">
+            <h5>Booking #{{ booking.pk }}</h5>
+            <p><strong>Amount due:</strong> {{ booking.total_amount }}</p>
+            <p><strong>Booking status:</strong> {{ booking.get_status_display }}</p>
+
+            <div class="alert alert-info">
+                <strong>Demo payment only.</strong>
+                No real money or card details will be collected.
+            </div>
+
+            {% if booking.status == "PENDING" %}
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">
+                        Confirm Demo Payment
+                    </button>
+                </form>
+            {% else %}
+                <p>This booking is not awaiting payment.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

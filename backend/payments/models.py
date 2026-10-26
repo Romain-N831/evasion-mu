@@ -7,6 +7,7 @@ class Payment(models.Model):
         CREDIT_CARD = "CREDIT_CARD", "Credit card"
         DEBIT_CARD = "DEBIT_CARD", "Debit card"
         ONLINE_TRANSFER = "ONLINE_TRANSFER", "Online transfer"
+        DEMO = "DEMO", "Demo payment"
 
     class Status(models.TextChoices):
         PENDING = "PENDING", "Pending"

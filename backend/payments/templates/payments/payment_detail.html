@@ -1,0 +1,25 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Payment Details</h1>
+
+    <div class="card mt-3">
+        <div class="card-body">
+            <p><strong>Payment ID:</strong> #{{ payment.pk }}</p>
+            <p><strong>Booking:</strong> #{{ payment.booking_id }}</p>
+            <p><strong>Amount:</strong> {{ payment.amount_paid }}</p>
+            <p><strong>Payment method:</strong> {{ payment.get_payment_method_display }}</p>
+            <p><strong>Status:</strong> {{ payment.get_status_display }}</p>
+            <p><strong>Transaction type:</strong> {{ payment.get_transaction_type_display }}</p>
+            <p><strong>Reference:</strong> {{ payment.transaction_reference|default:"—" }}</p>
+            <p><strong>Date:</strong> {{ payment.payment_date|date:"d M Y, H:i" }}</p>
+
+            <a href="{% url 'payments:payment_list' %}" class="btn btn-secondary">
+                Back to My Payments
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
