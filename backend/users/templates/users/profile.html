@@ -1,61 +1,64 @@
 
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}My Profile | Evasion.mu{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'users/css/users.css' %}">{% endblock %}
 
 {% block content %}
-<section class="container" style="max-width: 900px; margin: 40px auto; padding: 0 20px;">
-    <h1>My Profile</h1>
+<section class="users-page">
+    <div class="users-page-heading"><p class="users-eyebrow">YOUR EVASION.MU ACCOUNT</p><h1>My Profile</h1><p>Keep your details up to date and review your recent travel activity.</p></div>
 
     {% if messages %}
         {% for message in messages %}
-            <p role="status">{{ message }}</p>
+            <div class="users-alert users-alert-{{ message.tags|default:'info' }}" role="status">{{ message }}</div>
         {% endfor %}
     {% endif %}
 
-    <h2>Personal details</h2>
-    <form method="post">
+    <div class="users-profile-grid"><div class="users-card"><h2 class="users-section-title">Personal details</h2><p class="users-section-copy">These details are used for your Evasion.mu bookings.</p>
+    <form method="post" class="users-form">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Save changes</button>
+        {% for field in form %}<div class="users-form-field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}</div>{% endfor %}
+        <button type="submit" class="users-button">Save changes</button>
     </form>
 
-    <h2>Account settings</h2>
+    </div><aside>
+    <div class="users-card users-settings-card"><h2 class="users-section-title">Account settings</h2>
     <p>
-        <a href="{% url 'users:password_change' %}">
+        <a class="users-text-link" href="{% url 'users:password_change' %}">
             Change password
         </a>
     </p>
 
     <form method="post" action="{% url 'users:logout' %}">
         {% csrf_token %}
-        <button type="submit">Log out</button>
+        <button type="submit" class="users-button users-button-danger">Log out</button>
     </form>
 
-    <h2>Recent bookings</h2>
+    </div><div class="users-card users-settings-card"><h2 class="users-section-title">Recent bookings</h2>
     {% if recent_bookings %}
-        <ul>
+        <ul class="users-list">
             {% for booking in recent_bookings %}
                 <li>
                     Booking #{{ booking.pk }} —
                     {{ booking.get_status_display }} —
                     {{ booking.total_amount }}
-                    <a href="{% url 'bookings:booking-detail' booking.pk %}">
+                    <a class="users-text-link" href="{% url 'bookings:booking-detail' booking.pk %}">
                         View details
                     </a>
                 </li>
             {% endfor %}
         </ul>
-        <a href="{% url 'bookings:booking-list' %}">
+        <a class="users-text-link" href="{% url 'bookings:booking-list' %}">
             View all my bookings
         </a>
     {% else %}
         <p>You have no bookings yet.</p>
     {% endif %}
 
-    <h2>Recent payments</h2>
+    </div><div class="users-card users-settings-card"><h2 class="users-section-title">Recent payments</h2>
     {% if recent_payments %}
-        <ul>
+        <ul class="users-list">
             {% for payment in recent_payments %}
                 <li>
                     {{ payment.get_status_display }} —
@@ -66,6 +69,6 @@
         </ul>
     {% else %}
         <p>No payments to display yet.</p>
-    {% endif %}
+    {% endif %}</div></aside></div>
 </section>
 {% endblock %}

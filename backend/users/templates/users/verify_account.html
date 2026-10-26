@@ -1,0 +1,60 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Verify Your Account | Evasion.mu{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'users/css/users.css' %}">{% endblock %}
+
+{% block content %}
+<section class="users-page"><div class="users-card users-status-card">
+    <span class="users-status-icon" aria-hidden="true">✓</span>
+    <h2>Verify Your Account</h2>
+
+    <p>
+        Enter the six-digit verification code sent to your email address
+        to activate your Evasion.mu account.
+    </p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" action="{% url 'users:verify' %}" class="users-form">
+        {% csrf_token %}
+
+        {{ form.non_field_errors }}
+
+        <div class="users-form-field">
+            <label for="{{ form.code.id_for_label }}">
+                Verification code
+            </label>
+
+            {{ form.code }}
+
+            {% for error in form.code.errors %}
+                <div class="users-errorlist">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="users-button">
+            Verify Account
+        </button>
+    </form>
+
+    <hr class="users-divider">
+
+    <p>Didn't receive your code, or has it expired?</p>
+
+    <form method="post" action="{% url 'users:resend_verification_code' %}">
+        {% csrf_token %}
+
+        <button type="submit" class="users-button users-button-secondary">
+            Resend Verification Code
+        </button>
+    </form>
+</div></section>
+{% endblock %}

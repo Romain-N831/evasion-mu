@@ -1,6 +1,9 @@
+from datetime import timedelta
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from users.models import Customer
 
@@ -136,6 +139,116 @@ class UserProfileTests(TestCase):
 
         self.user.refresh_from_db()
         self.assertEqual(self.user.email, "profile@example.com")
+
+
+class AuthenticationRedirectTests(TestCase):
+    def create_user_with_customer(self, *, username, verified=True):
+        user = User.objects.create_user(
+            username=username,
+            password="SafeTestPass123!",
+        )
+        customer = Customer.objects.create(
+            user=user,
+            is_verified=verified,
+        )
+        return user, customer
+
+    def test_successful_verification_redirects_home_and_clears_code(self):
+        user, customer = self.create_user_with_customer(
+            username="verificationuser",
+            verified=False,
+        )
+        customer.verification_code = "123456"
+        customer.verification_code_expires_at = timezone.now() + timedelta(minutes=15)
+        customer.save()
+        session = self.client.session
+        session["pending_verification_user_id"] = user.pk
+        session.save()
+
+        response = self.client.post(reverse("users:verify"), {"code": "123456"})
+
+        self.assertRedirects(response, reverse("home"))
+        customer.refresh_from_db()
+        self.assertTrue(customer.is_verified)
+        self.assertEqual(customer.verification_code, "")
+        self.assertIsNone(customer.verification_code_expires_at)
+        self.assertNotIn("pending_verification_user_id", self.client.session)
+
+    def test_verified_user_login_redirects_home_without_next(self):
+        self.create_user_with_customer(username="verifiedlogin")
+
+        response = self.client.post(
+            reverse("users:login"),
+            {"username": "verifiedlogin", "password": "SafeTestPass123!"},
+        )
+
+        self.assertRedirects(response, reverse("home"))
+
+    def test_login_respects_next_destination(self):
+        self.create_user_with_customer(username="nextlogin")
+        destination = reverse("users:profile")
+
+        response = self.client.post(
+            reverse("users:login"),
+            {
+                "username": "nextlogin",
+                "password": "SafeTestPass123!",
+                "next": destination,
+            },
+        )
+
+        self.assertRedirects(response, destination)
+
+    def test_unverified_user_cannot_log_in(self):
+        self.create_user_with_customer(username="unverifiedlogin", verified=False)
+
+        response = self.client.post(
+            reverse("users:login"),
+            {"username": "unverifiedlogin", "password": "SafeTestPass123!"},
+        )
+
+        self.assertRedirects(response, reverse("users:login"))
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_user_without_customer_profile_cannot_log_in(self):
+        User.objects.create_user(
+            username="no-profile",
+            password="SafeTestPass123!",
+        )
+
+        response = self.client.post(
+            reverse("users:login"),
+            {"username": "no-profile", "password": "SafeTestPass123!"},
+        )
+
+        self.assertRedirects(response, reverse("users:login"))
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+
+class BaseNavigationTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="navigationuser",
+            password="SafeTestPass123!",
+        )
+        Customer.objects.create(user=self.user, is_verified=True)
+
+    def test_authenticated_navigation_shows_profile_link(self):
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse("home"))
+
+        self.assertContains(response, reverse("users:profile"))
+        self.assertContains(response, 'aria-label="My Profile"')
+        self.assertNotContains(response, 'href="{}">Login'.format(reverse("users:login")))
+        self.assertNotContains(response, 'href="{}">Register'.format(reverse("users:register")))
+
+    def test_anonymous_navigation_shows_login_and_register_links(self):
+        response = self.client.get(reverse("home"))
+
+        self.assertContains(response, reverse("users:login"))
+        self.assertContains(response, reverse("users:register"))
+        self.assertNotContains(response, 'aria-label="My Profile"')
 
 
 

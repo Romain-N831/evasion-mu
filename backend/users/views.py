@@ -1,3 +1,4 @@
+
 from django.contrib import messages
 from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
@@ -6,12 +7,19 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.db import transaction
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
+from django.utils import timezone
+from django.views.decorators.http import require_POST
 
 from bookings.models import Booking
 from payments.models import Payment
 
-from .forms import CustomerProfileForm, RegistrationForm
+from .forms import (
+    CustomerProfileForm,
+    RegistrationForm,
+    VerificationCodeForm,
+)
 from .models import Customer, CustomerActivityLog
+from .utils import send_verification_email
 
 
 def register(request):
@@ -23,27 +31,173 @@ def register(request):
 
         if form.is_valid():
             user = form.save()
-            login(request, user)
+            customer = user.customer_profile
+
+            # Store the pending user before sending email so that the user
+            # can request another code if email delivery fails.
+            request.session["pending_verification_user_id"] = user.pk
+
+            try:
+                send_verification_email(customer)
+            except Exception:
+                messages.error(
+                    request,
+                    "Your account was created, but we could not send "
+                    "the verification email. Please try requesting a "
+                    "new code.",
+                )
+                return redirect("users:verify")
 
             messages.success(
                 request,
-                "Your Evasion.mu account has been created."
+                "Account created. Check your email for your verification code.",
             )
-            return redirect("users:profile")
+            return redirect("users:verify")
+
     else:
         form = RegistrationForm()
 
+    return render(request, "users/register.html", {"form": form})
+
+
+@require_POST
+def resend_verification_code(request):
+    user_id = request.session.get("pending_verification_user_id")
+
+    if not user_id:
+        messages.info(
+            request,
+            "Please register or start verification first.",
+        )
+        return redirect("users:register")
+
+    try:
+        customer = Customer.objects.select_related("user").get(
+            user_id=user_id
+        )
+    except Customer.DoesNotExist:
+        request.session.pop("pending_verification_user_id", None)
+        messages.error(request, "We could not find that account.")
+        return redirect("users:register")
+
+    if customer.is_verified:
+        request.session.pop("pending_verification_user_id", None)
+        messages.info(request, "Your account is already verified.")
+        return redirect("users:login")
+
+    try:
+        send_verification_email(customer)
+    except Exception:
+        messages.error(
+            request,
+            "We could not send a new verification email. "
+            "Please try again later.",
+        )
+    else:
+        messages.success(
+            request,
+            "A new verification code has been sent to your email.",
+        )
+
+    return redirect("users:verify")
+
+
+def verify_account(request):
+    user_id = request.session.get("pending_verification_user_id")
+
+    if not user_id:
+        messages.info(
+            request,
+            "Please register to verify your account.",
+        )
+        return redirect("users:register")
+
+    try:
+        customer = Customer.objects.select_related("user").get(
+            user_id=user_id
+        )
+    except Customer.DoesNotExist:
+        request.session.pop("pending_verification_user_id", None)
+        messages.error(request, "We could not find that account.")
+        return redirect("users:register")
+
+    if customer.is_verified:
+        request.session.pop("pending_verification_user_id", None)
+        messages.info(request, "Your account is already verified.")
+        return redirect("users:login")
+
+    if request.method == "POST":
+        form = VerificationCodeForm(request.POST)
+
+        if form.is_valid():
+            if (
+                customer.verification_code == form.cleaned_data["code"]
+                and customer.verification_code_expires_at
+                and customer.verification_code_expires_at > timezone.now()
+            ):
+                customer.is_verified = True
+                customer.verification_code = ""
+                customer.verification_code_expires_at = None
+                customer.save(
+                    update_fields=[
+                        "is_verified",
+                        "verification_code",
+                        "verification_code_expires_at",
+                        "updated_at",
+                    ]
+                )
+
+                request.session.pop("pending_verification_user_id", None)
+
+                messages.success(
+                    request,
+                    "Your account is verified. You can now log in.",
+                )
+                return redirect("home")
+
+            form.add_error(
+                "code",
+                "The code is incorrect or has expired. Please try again.",
+            )
+    else:
+        form = VerificationCodeForm()
+
     return render(
         request,
-        "users/register.html",
-        {"form": form},
+        "users/verify_account.html",
+        {
+            "form": form,
+            "customer": customer,
+        },
     )
 
 
 class UserLoginView(LoginView):
     template_name = "users/login.html"
     redirect_authenticated_user = True
-    next_page = reverse_lazy("users:profile")
+    next_page = reverse_lazy("home")
+
+    def form_valid(self, form):
+        user = form.get_user()
+
+        try:
+            customer = user.customer_profile
+        except Customer.DoesNotExist:
+            messages.error(
+                self.request,
+                "This account does not have a customer profile. "
+                "Please contact support.",
+            )
+            return redirect("users:login")
+
+        if not customer.is_verified:
+            messages.error(
+                self.request,
+                "Please verify your account before logging in.",
+            )
+            return redirect("users:login")
+
+        return super().form_valid(form)
 
 
 class UserLogoutView(LogoutView):
@@ -74,7 +228,7 @@ def profile(request):
 
             messages.success(
                 request,
-                "Your profile has been updated."
+                "Your profile has been updated.",
             )
             return redirect("users:profile")
     else:
@@ -117,7 +271,7 @@ def password_change(request):
 
             messages.success(
                 request,
-                "Your password has been changed."
+                "Your password has been changed.",
             )
             return redirect("users:profile")
     else:
