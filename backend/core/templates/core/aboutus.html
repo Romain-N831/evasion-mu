@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}About Us | Evasion.mu{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/aboutus.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="about-page">
+
+    <section class="about-hero">
+        <div class="about-hero-content">
+            <p class="about-eyebrow">GET TO KNOW US</p>
+            <h1>Discover Mauritius, differently.</h1>
+            <p>
+                Every journey tells a story. Let us help you discover
+                the places, people and experiences that make Mauritius unforgettable.
+            </p>
+            <a href="{% url 'activities:list' %}" class="about-button">
+                Explore Mauritius →
+            </a>
+        </div>
+    </section>
+
+    <section class="about-intro">
+        <p class="about-eyebrow">OUR STORY</p>
+        <h2>More than a destination. An experience.</h2>
+        <p>
+            Evasion.mu is designed to help travellers discover the best
+            of Mauritius in one convenient place. From exciting island
+            activities to comfortable places to stay, we bring experiences
+            together to make planning your getaway easier.
+        </p>
+    </section>
+
+    <section class="about-values">
+        <article class="about-value-card">
+            <span class="value-number">01</span>
+            <h3>Our Mission</h3>
+            <p>
+                To make exploring Mauritius simpler by connecting travellers
+                with activities and accommodation that suit their journey.
+            </p>
+        </article>
+
+        <article class="about-value-card">
+            <span class="value-number">02</span>
+            <h3>Our Vision</h3>
+            <p>
+                To be a convenient starting point for discovering the
+                beauty, culture and unforgettable experiences of our island.
+            </p>
+        </article>
+
+        <article class="about-value-card">
+            <span class="value-number">03</span>
+            <h3>Our Promise</h3>
+            <p>
+                To provide a simple, welcoming experience that helps
+                visitors spend less time planning and more time exploring.
+            </p>
+        </article>
+    </section>
+
+    <section class="about-cta">
+        <h2>Your Mauritius adventure awaits.</h2>
+        <p>Find your next favourite place or unforgettable experience.</p>
+        <a href="{% url 'activities:list' %}" class="about-button">
+            Start Exploring
+        </a>
+    </section>
+
+</div>
+{% endblock %}

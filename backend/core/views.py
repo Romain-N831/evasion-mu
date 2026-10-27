@@ -10,3 +10,6 @@ def home(request):
     return render(request, 'core/home.html', {
         "activities": activities
     })
+
+def aboutus(request):
+    return render(request, "core/aboutus.html")
