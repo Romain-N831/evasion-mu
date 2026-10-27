@@ -1,0 +1,265 @@
+/* HERO */
+.hero {
+    position: relative;
+    min-height: 540px;
+    display: flex;
+    align-items: center;
+    padding: 70px 8%;
+    background:
+        linear-gradient(90deg, rgba(8, 35, 43, 0.88), rgba(8, 35, 43, 0.2)),
+        url("https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&w=2000&q=85")
+        center 55% / cover no-repeat;
+    color: white;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 650px;
+}
+
+.hero-tagline,
+.section-tag {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #159b91;
+}
+
+.hero-tagline {
+    color: #a5e8dc;
+}
+
+.hero h1 {
+    font-size: clamp(38px, 5vw, 64px);
+    line-height: 1.08;
+    margin: 18px 0;
+}
+
+.hero-description {
+    max-width: 530px;
+    font-size: 17px;
+    line-height: 1.8;
+    color: #edf5f5;
+}
+
+.hero-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 28px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 14px 23px;
+    border-radius: 7px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn-primary {
+    background: #11998e;
+    color: white;
+}
+
+.btn-secondary {
+    border: 1px solid white;
+    color: white;
+}
+
+/* WELCOME */
+.welcome-section {
+    max-width: 760px;
+    margin: auto;
+    padding: 70px 24px 45px;
+    text-align: center;
+}
+
+.welcome-section h2,
+.section-heading h2,
+.cta-section h2 {
+    font-size: clamp(27px, 3vw, 38px);
+    margin: 12px 0;
+    color: #163b40;
+}
+
+.welcome-section > p:last-child {
+    line-height: 1.8;
+    color: #657477;
+}
+
+/* ACTIVITIES */
+.activities-section {
+    padding: 35px 8% 80px;
+}
+
+.section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+.view-all {
+    color: #087f78;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.activity-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 25px;
+}
+
+.activity-card {
+    overflow: hidden;
+    background: white;
+    border: 1px solid #e8eeee;
+    border-radius: 12px;
+    box-shadow: 0 5px 22px rgba(20, 50, 50, 0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.activity-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 28px rgba(20, 50, 50, 0.12);
+}
+
+.activity-card img {
+    display: block;
+    width: 100%;
+    height: 210px;
+    object-fit: cover;
+}
+
+.activity-card-content {
+    padding: 20px;
+}
+
+.activity-location {
+    color: #0b8c82;
+    font-size: 13px;
+    margin: 0 0 8px;
+}
+
+.activity-card h3 {
+    margin: 0 0 10px;
+    color: #173c40;
+    font-size: 19px;
+}
+
+.activity-description {
+    color: #6a7779;
+    line-height: 1.6;
+    font-size: 14px;
+    min-height: 44px;
+}
+
+.activity-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    border-top: 1px solid #edf0f0;
+    padding-top: 16px;
+    margin-top: 18px;
+}
+
+.activity-price {
+    font-weight: 700;
+    color: #173c40;
+}
+
+.activity-card-footer a {
+    color: #087f78;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.empty-message {
+    grid-column: 1 / -1;
+    padding: 30px;
+    text-align: center;
+    color: #657477;
+}
+
+/* CALL TO ACTION */
+.cta-section {
+    margin: 0 8% 75px;
+    padding: 55px 25px;
+    border-radius: 14px;
+    background: #eaf6f3;
+    text-align: center;
+}
+
+.cta-section p {
+    color: #657477;
+    margin-bottom: 25px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .activity-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .hero {
+        min-height: 500px;
+        padding: 55px 7%;
+    }
+
+    .hero h1 {
+        font-size: 40px;
+    }
+
+    .section-heading {
+        align-items: start;
+        flex-direction: column;
+    }
+
+    .activities-section {
+        padding-right: 6%;
+        padding-left: 6%;
+    }
+
+    .activity-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .cta-section {
+        margin-right: 6%;
+        margin-left: 6%;
+    }
+}
+/* Homepage-only full-width layout */
+.site-main:has(.homepage) {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.homepage {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.homepage .hero {
+    width: 100%;
+    margin: 0;
+    box-sizing: border-box;
+}
