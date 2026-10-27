@@ -155,6 +155,11 @@
                             <span>Be the first to share your experience once you've taken part.</span>
                         </div>
                     {% endif %}
+                    <a class="reviews-show-more"
+                        href="{% url 'add_review' activity.id %}">
+                        Write a Review
+                        <span aria-hidden="true">&rarr;</span>
+                    </a>
 
                 </section>
             </div>

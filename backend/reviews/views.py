@@ -35,7 +35,7 @@ def activity_reviews(request, activity_id): # displays approved reviews for an a
 
 @login_required # restricts a view to authenticated users
 def add_review(request, activity_id): # allows a logged-in customer to submit a review
-    activity = get_object_or_404(Activity, id=activity_id)
+    activity = get_object_or_404(Activity, id=activity_id, is_active=True)
 
     if request.method == "POST": # usually used to submit data to the server
         form = ReviewForm(request.POST)
@@ -43,9 +43,9 @@ def add_review(request, activity_id): # allows a logged-in customer to submit a 
         if form.is_valid(): # checks if the submitted data satisfies the form's validation rules
             review = form.save(commit=False) # create the review without saving it
             review.activity = activity
+            review.customer = request.user.customer_profile
             review.moderation_status = Review.ModerationStatus.PENDING # the review won't appear in the public list until it's approved
 
-            review.customer = request.user.customer_profile
             review.save() # save the review
 
             return redirect("activity_reviews", activity_id=activity.id)
