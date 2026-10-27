@@ -1,0 +1,153 @@
+.about-page {
+    width: 100%;
+    color: #173c40;
+}
+
+.site-main:has(.about-page) {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.about-hero {
+    min-height: 440px;
+    padding: 70px 8%;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    color: white;
+    background:
+        linear-gradient(90deg, rgba(4, 25, 35, 0.82), rgba(4, 25, 35, 0.20)),
+        url("https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=2000&q=85")
+        center 55% / cover no-repeat;
+}
+
+.about-hero-content {
+    max-width: 650px;
+}
+
+.about-eyebrow {
+    color: #11998e;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.about-hero .about-eyebrow {
+    color: #a5e8dc;
+}
+
+.about-hero h1 {
+    margin: 18px 0;
+    font-size: clamp(38px, 5vw, 62px);
+    line-height: 1.1;
+}
+
+.about-hero-content > p:not(.about-eyebrow) {
+    max-width: 540px;
+    color: #edf5f5;
+    line-height: 1.8;
+    font-size: 17px;
+}
+
+.about-button {
+    display: inline-block;
+    margin-top: 18px;
+    padding: 14px 22px;
+    background: #11998e;
+    color: white;
+    text-decoration: none;
+    font-weight: 700;
+    border-radius: 7px;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.about-button:hover {
+    background: #087f78;
+    transform: translateY(-2px);
+}
+
+.about-intro {
+    max-width: 780px;
+    margin: auto;
+    padding: 75px 24px 50px;
+    text-align: center;
+}
+
+.about-intro h2,
+.about-cta h2 {
+    font-size: clamp(28px, 3vw, 38px);
+    line-height: 1.2;
+    margin: 14px 0;
+}
+
+.about-intro > p:last-child {
+    color: #657477;
+    line-height: 1.9;
+}
+
+.about-values {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    padding: 25px 8% 75px;
+}
+
+.about-value-card {
+    padding: 28px;
+    border: 1px solid #e5eeee;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 5px 22px rgba(20, 50, 50, 0.05);
+}
+
+.value-number {
+    color: #11998e;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.about-value-card h3 {
+    margin: 16px 0 10px;
+    font-size: 21px;
+}
+
+.about-value-card p {
+    margin-bottom: 0;
+    color: #657477;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.about-cta {
+    margin: 0 8% 75px;
+    padding: 50px 25px;
+    text-align: center;
+    background: #eaf6f3;
+    border-radius: 14px;
+}
+
+.about-cta p {
+    color: #657477;
+    line-height: 1.7;
+}
+
+@media (max-width: 750px) {
+    .about-hero {
+        min-height: 400px;
+        padding: 55px 7%;
+    }
+
+    .about-values {
+        grid-template-columns: 1fr;
+        padding-right: 6%;
+        padding-left: 6%;
+    }
+
+    .about-cta {
+        margin-right: 6%;
+        margin-left: 6%;
+    }
+}
