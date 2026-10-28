@@ -1,4 +1,4 @@
-
+```django
 {% extends "base.html" %}
 {% load static %}
 
@@ -10,10 +10,12 @@
 
 {% block content %}
 
-<div class="hotels-container">
+<div class="hotels-page">
 
-    <h1>Discover Hotels in Mauritius</h1>
-    <p>Find the perfect place to stay during your visit.</p>
+    <div class="hotels-hero">
+        <h1>Discover Hotels in Mauritius</h1>
+        <p>Find the perfect place to stay during your visit.</p>
+    </div>
 
     <form method="GET" class="hotel-search">
 
@@ -22,9 +24,10 @@
             name="q"
             placeholder="Search by hotel or location..."
             value="{{ search_query }}"
+            class="hotel-search-field"
         >
 
-        <select name="region">
+        <select name="region" class="hotel-filter-field">
             <option value="">All regions</option>
 
             {% for region in regions %}
@@ -35,44 +38,71 @@
             {% endfor %}
         </select>
 
-        <button type="submit">Search</button>
+        <button type="submit" class="hotel-filter-button">
+            Search
+        </button>
+
+        {% if search_query or selected_region %}
+            <a href="{% url 'hotels:list' %}" class="hotel-reset-filter">
+                Clear filters
+            </a>
+        {% endif %}
 
     </form>
 
-    <div class="hotel-grid">
+    <div class="hotels-grid">
 
         {% for hotel in hotels %}
 
             <div class="hotel-card">
 
                 {% if hotel.image_url %}
-                    <img src="{{ hotel.image_url }}" alt="{{ hotel.name }}">
+                    <img
+                        class="hotel-image"
+                        src="{{ hotel.image_url }}"
+                        alt="{{ hotel.name }}"
+                    >
+                {% else %}
+                    <div class="hotel-placeholder">
+                        Hotel image unavailable
+                    </div>
                 {% endif %}
 
                 <div class="hotel-card-content">
 
                     <h2>{{ hotel.name }}</h2>
 
-                    <p>{{ hotel.city }}, {{ hotel.region }}</p>
+                    <p class="hotel-location">
+                        {{ hotel.city }}{% if hotel.city and hotel.region %}, {% endif %}{{ hotel.region }}
+                    </p>
 
                     {% if hotel.star_rating %}
-                        <p>{{ hotel.star_rating }} Star Hotel</p>
+                        <p class="hotel-rating">
+                            {{ hotel.star_rating }} Star Hotel
+                        </p>
                     {% endif %}
 
-                    <p>{{ hotel.description|truncatewords:20 }}</p>
+                    <p class="hotel-description">
+                        {{ hotel.description|truncatewords:20 }}
+                    </p>
 
-                    <a href="{% url 'hotels:detail' hotel.id %}">
-                        View Hotel
-                    </a>
+                    <div class="hotel-card-footer">
+                        <a
+                            href="{% url 'hotels:detail' hotel.id %}"
+                            class="hotel-view-button"
+                        >
+                            View Hotel
+                        </a>
+                    </div>
 
                 </div>
-
             </div>
 
         {% empty %}
-
-            <p>No hotels found.</p>
-
+            <div class="hotels-empty">
+                <h2>No hotels found</h2>
+                <p>Try another search or select a different region.</p>
+            </div>
         {% endfor %}
 
     </div>
@@ -80,3 +110,4 @@
 </div>
 
 {% endblock %}
+```
