@@ -56,7 +56,7 @@ def checkout(request, booking_id):
             booking.save(update_fields=["status"])
 
         messages.success(request, "Demo payment successful! No real money was charged.")
-        return redirect("payments:detail", payment_id=payment.pk)
+        return redirect("payments:payment_detail", payment_id=payment.pk)
 
     return render(
         request,

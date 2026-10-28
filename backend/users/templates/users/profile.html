@@ -1,0 +1,71 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>My Profile</h1>
+    <p>View and update your Evasion.mu account details.</p>
+
+    <h2>Personal Information</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save Changes</button>
+    </form>
+
+    <p>
+        <a href="{% url 'users:password_change' %}">
+            Change Password
+        </a>
+    </p>
+
+    <hr>
+
+    <h2>Recent Bookings</h2>
+
+    {% if recent_bookings %}
+        <ul>
+            {% for booking in recent_bookings %}
+                <li>
+                    Booking #{{ booking.pk }}
+                    — {{ booking.get_status_display }}
+                    — {{ booking.total_amount }}
+
+                    <a href="{% url 'bookings:booking-detail' pk=booking.pk %}">
+                        View Booking
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You do not have any bookings yet.</p>
+    {% endif %}
+
+    <hr>
+
+    <h2>Recent Payments</h2>
+
+    {% if recent_payments %}
+        <ul>
+            {% for payment in recent_payments %}
+                <li>
+                    {{ payment.amount_paid }}
+                    — {{ payment.get_status_display }}
+
+                    <a href="{% url 'payments:payment_detail' payment_id=payment.pk %}">
+                        View Payment
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+        <p>
+            <a href="{% url 'payments:payment_list' %}">
+                View All Payments
+            </a>
+        </p>
+    {% else %}
+        <p>You do not have any payments yet.</p>
+    {% endif %}
+</div>
+{% endblock %}
