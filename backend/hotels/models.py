@@ -3,6 +3,21 @@ from django.db import models
 
 
 class Hotel(models.Model):
+    STATIC_IMAGES = {
+        "Labourdonnais Waterfront Hotel": "hotels/images/labourdonnais.jpeg",
+        "Hennessy Park Hotel": "hotels/images/hennessy-park.jpeg",
+        "Hilton Mauritius Resort & Spa": "hotels/images/hilton-mauritius.jpeg",
+        "La Pirogue Mauritius": "hotels/images/la-pirogue.jpeg",
+        "Sugar Beach Mauritius": "hotels/images/sugar-beach.jpeg",
+        "Constance Belle Mare Plage": "hotels/images/constance-belle-mare.jpeg",
+        "Four Seasons Resort Mauritius at Anahita": "hotels/images/four-seasons-anahita.jpeg",
+        "LUX* Belle Mare Resort & Villas": "hotels/images/lux-belle-mare.jpeg",
+        "Heritage Le Telfair Golf & Wellness Resort": "hotels/images/heritage-le-telfair.jpeg",
+        "Dinarobin Beachcomber Golf Resort & Spa": "hotels/images/dinarobin.jpeg",
+        "Trou aux Biches Beachcomber Golf Resort & Spa": "hotels/images/trou-aux-biches.jpeg",
+        "Constance Prince Maurice": "hotels/images/constance-prince-maurice.jpeg",
+    }
+
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     address = models.CharField(max_length=255, blank=True)
@@ -11,6 +26,7 @@ class Hotel(models.Model):
     star_rating = models.PositiveSmallIntegerField(null=True, blank=True,
         validators=[MinValueValidator(1), MaxValueValidator(5)])
     image_url = models.URLField(blank=True)
+    image_path = models.CharField(max_length=255, blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -20,6 +36,10 @@ class Hotel(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def static_image(self):
+        return self.STATIC_IMAGES.get(self.name)
 
 
 class RoomType(models.Model):

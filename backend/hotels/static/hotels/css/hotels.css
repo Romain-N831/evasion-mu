@@ -422,6 +422,63 @@
     text-decoration: none;
 }
 
+.hotel-form-container {
+    max-width: 640px;
+    width: calc(100% - 40px);
+    margin: 40px auto 64px;
+    padding: 28px;
+    border: 1px solid #e5ebef;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 5px 18px rgba(24, 50, 71, 0.055);
+    color: #183247;
+}
+
+.hotel-form-container h1 {
+    margin: 0 0 18px;
+}
+
+.hotel-form-container form p {
+    margin: 0 0 14px;
+}
+
+.hotel-form-container label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.hotel-form-container input,
+.hotel-form-container select,
+.hotel-form-container textarea {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d8e1e7;
+    border-radius: 9px;
+    font: inherit;
+}
+
+.hotel-form-container button {
+    min-height: 44px;
+    margin-right: 12px;
+    padding: 0 18px;
+    border: 1px solid #087f91;
+    border-radius: 9px;
+    background: #087f91;
+    color: #ffffff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.hotel-form-container a {
+    color: #536777;
+    font-weight: 700;
+    text-decoration: none;
+}
+
 /* Tablet */
 
 @media (max-width: 1000px) {

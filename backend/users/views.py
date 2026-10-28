@@ -153,7 +153,7 @@ def verify_account(request):
                     request,
                     "Your account is verified. You can now log in.",
                 )
-                return redirect("home")
+                return redirect("core:home")
 
             form.add_error(
                 "code",
@@ -175,7 +175,7 @@ def verify_account(request):
 class UserLoginView(LoginView):
     template_name = "users/login.html"
     redirect_authenticated_user = True
-    next_page = reverse_lazy("home")
+    next_page = reverse_lazy("core:home")
 
     def form_valid(self, form):
         user = form.get_user()
@@ -201,7 +201,7 @@ class UserLoginView(LoginView):
 
 
 class UserLogoutView(LogoutView):
-    next_page = reverse_lazy("home")
+    next_page = reverse_lazy("core:home")
 
 
 @login_required

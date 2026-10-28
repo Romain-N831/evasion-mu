@@ -1,6 +1,8 @@
-# Create your tests here.
-from django.test import TestCase
 from datetime import date
+from decimal import Decimal
+
+from django.test import TestCase
+from django.urls import reverse
 
 from .models import Hotel, RoomType, RoomAvailability
 
@@ -70,3 +72,86 @@ class RoomAvailabilityModelTest(TestCase):
 
     def test_availability_string_representation(self):
         self.assertIn("3 available", str(self.availability))
+
+
+class HotelViewTest(TestCase):
+
+    def setUp(self):
+        self.hotel = Hotel.objects.create(
+            name="Lagoon View Resort",
+            city="Flic en Flac",
+            region="West",
+            star_rating=4,
+            is_active=True,
+        )
+        self.inactive_hotel = Hotel.objects.create(
+            name="Hidden Hotel",
+            city="Port Louis",
+            region="Northwest",
+            is_active=False,
+        )
+        RoomType.objects.create(
+            hotel=self.hotel,
+            name="Deluxe Room",
+            price_per_night=Decimal("4500.00"),
+            total_rooms=4,
+        )
+        RoomType.objects.create(
+            hotel=self.hotel,
+            name="Standard Room",
+            price_per_night=Decimal("2800.00"),
+            total_rooms=8,
+        )
+
+    def test_hotel_list_renders_active_hotels(self):
+        response = self.client.get(reverse("hotels:list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Lagoon View Resort")
+        self.assertNotContains(response, "Hidden Hotel")
+
+    def test_hotel_list_filters_by_search_and_region(self):
+        response = self.client.get(
+            reverse("hotels:list"),
+            {"q": "Lagoon", "region": "West"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Lagoon View Resort")
+
+        empty_response = self.client.get(
+            reverse("hotels:list"),
+            {"region": "East"},
+        )
+        self.assertContains(empty_response, "No hotels found")
+
+    def test_hotel_detail_uses_cheapest_room_as_starting_price(self):
+        response = self.client.get(
+            reverse("hotels:detail", args=[self.hotel.pk])
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Rs 2800.00")
+        self.assertContains(response, 'id="rooms"')
+
+    def test_inactive_hotel_detail_returns_404(self):
+        response = self.client.get(
+            reverse("hotels:detail", args=[self.inactive_hotel.pk])
+        )
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_hotel_delete_uses_confirm_template_for_staff(self):
+        from django.contrib.auth.models import Permission, User
+
+        user = User.objects.create_user(username="staff", password="pass12345")
+        permission = Permission.objects.get(codename="delete_hotel")
+        user.user_permissions.add(permission)
+        self.client.force_login(user)
+
+        response = self.client.get(
+            reverse("hotels:hotel_delete", args=[self.hotel.pk])
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "hotels/hotel_confirm_delete.html")

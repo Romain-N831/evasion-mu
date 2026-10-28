@@ -167,7 +167,7 @@ class AuthenticationRedirectTests(TestCase):
 
         response = self.client.post(reverse("users:verify"), {"code": "123456"})
 
-        self.assertRedirects(response, reverse("home"))
+        self.assertRedirects(response, reverse("core:home"))
         customer.refresh_from_db()
         self.assertTrue(customer.is_verified)
         self.assertEqual(customer.verification_code, "")
@@ -182,7 +182,7 @@ class AuthenticationRedirectTests(TestCase):
             {"username": "verifiedlogin", "password": "SafeTestPass123!"},
         )
 
-        self.assertRedirects(response, reverse("home"))
+        self.assertRedirects(response, reverse("core:home"))
 
     def test_login_respects_next_destination(self):
         self.create_user_with_customer(username="nextlogin")
@@ -236,7 +236,7 @@ class BaseNavigationTests(TestCase):
     def test_authenticated_navigation_shows_profile_link(self):
         self.client.force_login(self.user)
 
-        response = self.client.get(reverse("home"))
+        response = self.client.get(reverse("core:home"))
 
         self.assertContains(response, reverse("users:profile"))
         self.assertContains(response, 'aria-label="My Profile"')
@@ -244,7 +244,7 @@ class BaseNavigationTests(TestCase):
         self.assertNotContains(response, 'href="{}">Register'.format(reverse("users:register")))
 
     def test_anonymous_navigation_shows_login_and_register_links(self):
-        response = self.client.get(reverse("home"))
+        response = self.client.get(reverse("core:home"))
 
         self.assertContains(response, reverse("users:login"))
         self.assertContains(response, reverse("users:register"))

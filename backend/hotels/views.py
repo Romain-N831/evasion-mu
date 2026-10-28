@@ -1,5 +1,3 @@
-# Create your views here.
-
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Q
 from django.urls import reverse_lazy
@@ -9,7 +7,6 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 from .models import Hotel, RoomType, RoomAvailability
 
 
-# Display all active hotels and allow searching.
 def hotel_list(request):
 
     hotels = Hotel.objects.filter(is_active=True)
@@ -46,7 +43,6 @@ def hotel_list(request):
     return render(request, "hotels/hotel_list.html", context)
 
 
-# Display one hotel and its active room types.
 def hotel_detail(request, hotel_id):
 
     hotel = get_object_or_404(
@@ -55,7 +51,10 @@ def hotel_detail(request, hotel_id):
         is_active=True
     )
 
-    room_types = hotel.room_types.filter(is_active=True)
+    room_types = hotel.room_types.filter(is_active=True).order_by(
+        "price_per_night",
+        "name",
+    )
 
     context = {
         "hotel": hotel,
