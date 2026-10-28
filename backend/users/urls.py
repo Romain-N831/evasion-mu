@@ -1,21 +1,24 @@
 
 from django.urls import path
 from django.contrib.auth import views as auth_views
-
 from . import views
 
 app_name = "users"
 
 urlpatterns = [
+    # Registration and authentication
     path("register/", views.register, name="register"),
     path("login/", views.UserLoginView.as_view(), name="login"),
     path("logout/", views.UserLogoutView.as_view(), name="logout"),
     path("profile/", views.profile, name="profile"),
-    path("verify-email/", views.verify_email, name="verify_email"),
+    path("password-change/", views.password_change, name="password_change"),
+
+    # Email verification
+    path("verify/", views.verify_account, name="verify"),
     path(
-        "password-change/",
-        views.password_change,
-        name="password_change",
+        "verify/resend/",
+        views.resend_verification_code,
+        name="resend_verification_code",
     ),
 
     # Password reset
