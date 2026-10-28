@@ -1,0 +1,33 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Manage Hotel | Evasion.mu{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'hotels/css/hotels.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="hotel-form-container">
+
+    <h1>Hotel Management</h1>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit">Save</button>
+
+        <a href="{% url 'hotels:list' %}">
+            Cancel
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}

@@ -1,10 +1,6 @@
 from django.contrib import admin
 from .models import Hotel, RoomType, RoomAvailability
 
-admin.site.register(Hotel)
-admin.site.register(RoomType)
-admin.site.register(RoomAvailability)
-
 class RoomAvailabilityInline(admin.TabularInline):
 
     model = RoomAvailability

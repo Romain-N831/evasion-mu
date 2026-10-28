@@ -1,0 +1,81 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ hotel.name }} | Evasion.mu{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'hotels/css/hotels.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="hotel-detail-container">
+
+    <h1>{{ hotel.name }}</h1>
+
+    {% if hotel.image_url %}
+        <img
+            class="hotel-detail-image"
+            src="{{ hotel.image_url }}"
+            alt="{{ hotel.name }}"
+        >
+    {% endif %}
+
+    <p>{{ hotel.description }}</p>
+
+    <p><strong>Address:</strong> {{ hotel.address }}</p>
+
+    <p><strong>City:</strong> {{ hotel.city }}</p>
+
+    <p><strong>Region:</strong> {{ hotel.region }}</p>
+
+    {% if hotel.star_rating %}
+        <p><strong>Rating:</strong> {{ hotel.star_rating }} stars</p>
+    {% endif %}
+
+    <hr>
+
+    <h2>Available Room Types</h2>
+
+    <div class="room-grid">
+
+        {% for room in room_types %}
+
+            <div class="room-card">
+
+                <h3>{{ room.name }}</h3>
+
+                <p>{{ room.description }}</p>
+
+                <p>
+                    Maximum occupancy:
+                    {{ room.max_occupancy }} people
+                </p>
+
+                <p>
+                    Total rooms:
+                    {{ room.total_rooms }}
+                </p>
+
+                <h3>
+                    Rs {{ room.price_per_night }} per night
+                </h3>
+
+            </div>
+
+        {% empty %}
+
+            <p>No room types are currently available.</p>
+
+        {% endfor %}
+
+    </div>
+
+    <a href="{% url 'hotels:list' %}" class="back-link">
+        Back to Hotels
+    </a>
+
+</div>
+
+{% endblock %}

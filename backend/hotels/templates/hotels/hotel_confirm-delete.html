@@ -1,0 +1,28 @@
+
+{% extends "base.html" %}
+
+{% block title %}Delete Record | Evasion.mu{% endblock %}
+
+{% block content %}
+
+<div class="hotel-form-container">
+
+    <h1>Confirm Delete</h1>
+
+    <p>Are you sure you want to delete "{{ object }}"?</p>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <button type="submit">Yes, Delete</button>
+
+        <a href="{% url 'hotels:list' %}">
+            Cancel
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}
