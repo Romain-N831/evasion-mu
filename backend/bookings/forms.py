@@ -4,7 +4,7 @@ from django.db.models import Sum, Q, F
 from django.utils import timezone
 
 from activities.models import ActivitySlot, ActivityBlockedDate
-from .models import Booking
+from .models import Booking, PromoCode
 
 
 # Form used by customers when booking an activity.
@@ -20,6 +20,13 @@ class ActivityBookingForm(forms.Form):
     participant_count = forms.IntegerField(
         min_value=1,
         label="Number of participants"
+    )
+
+    # Optional code entered by the customer before creating a booking.
+    promo_code = forms.CharField(
+        max_length=40,
+        required=False,
+        label="Promo code",
     )
 
     def __init__(self, *args, activity, **kwargs):
@@ -116,3 +123,29 @@ class ActivityBookingForm(forms.Form):
 
         # Return the validated form data.
         return cleaned_data
+
+    def clean_promo_code(self):
+        """Validate a code now; its usage is recorded only after payment."""
+        code = self.cleaned_data["promo_code"].strip().upper()
+
+        # A blank field means the customer does not want a discount.
+        if not code:
+            return None
+
+        try:
+            promo_code = PromoCode.objects.get(code__iexact=code)
+        except PromoCode.DoesNotExist:
+            raise forms.ValidationError("This promo code does not exist.")
+
+        now = timezone.now()
+        if not promo_code.is_active:
+            raise forms.ValidationError("This promo code is not active.")
+        if not promo_code.valid_from <= now <= promo_code.valid_until:
+            raise forms.ValidationError("This promo code is not valid at this time.")
+        if (
+            promo_code.max_uses is not None
+            and promo_code.uses_count >= promo_code.max_uses
+        ):
+            raise forms.ValidationError("This promo code has reached its usage limit.")
+
+        return promo_code

@@ -10,6 +10,12 @@ app_name = 'bookings'
 
 
 urlpatterns = [
+    # Customer cancellation request for one owned booking.
+    path(
+        '<int:pk>/cancel/',
+        views.request_cancellation,
+        name='request-cancellation',
+    ),
     
     # Activity booking form: /bookings/activity/5/
     # activity_id identifies the activity the customer wants to book.

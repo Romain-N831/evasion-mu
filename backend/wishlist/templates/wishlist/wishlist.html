@@ -42,6 +42,14 @@
                     <p class="wishlist-date">
                         Added {{ item.date_added|date:"d M Y" }}
                     </p>
+
+                    <!-- The remove route accepts POST and verifies wishlist ownership. -->
+                    <form method="post" action="{% url 'wishlist:remove' item.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="wishlist-home-link">
+                            Remove from wishlist
+                        </button>
+                    </form>
                 </article>
             {% endfor %}
         </div>
@@ -49,7 +57,7 @@
         <div class="wishlist-empty">
             <h2>Your wishlist is empty</h2>
             <p>When you find an activity or room you love, save it here for later.</p>
-            <a href="{% url 'home' %}" class="wishlist-home-link">
+            <a href="{% url 'core:home' %}" class="wishlist-home-link">
                 Explore Mauritius
             </a>
         </div>

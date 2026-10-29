@@ -25,6 +25,11 @@
     </div><aside>
     <div class="users-card users-settings-card"><h2 class="users-section-title">Account settings</h2>
     <p>
+        <a class="users-text-link" href="{% url 'wishlist:detail' %}">
+            View my wishlist
+        </a>
+    </p>
+    <p>
         <a class="users-text-link" href="{% url 'users:password_change' %}">
             Change password
         </a>

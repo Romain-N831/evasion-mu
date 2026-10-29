@@ -5,8 +5,9 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
-from bookings.models import Booking
+from bookings.models import Booking, PromoCode
 from .models import Payment
 
 
@@ -43,6 +44,29 @@ def checkout(request, booking_id):
                 messages.info(request, "This booking has already been processed.")
                 return redirect("bookings:booking-detail", pk=booking.pk)
 
+            # A promo code is consumed only when this simulated payment succeeds.
+            # Refresh it under a lock so two checkouts cannot exceed max_uses.
+            if booking.promo_code_id:
+                promo_code = PromoCode.objects.select_for_update().get(
+                    pk=booking.promo_code_id
+                )
+                if (
+                    not promo_code.is_active
+                    or not promo_code.valid_from <= timezone.now() <= promo_code.valid_until
+                    or (
+                        promo_code.max_uses is not None
+                        and promo_code.uses_count >= promo_code.max_uses
+                    )
+                ):
+                    messages.error(
+                        request,
+                        "The promo code on this booking is no longer available."
+                    )
+                    return redirect("bookings:booking-detail", pk=booking.pk)
+
+                promo_code.uses_count += 1
+                promo_code.save(update_fields=["uses_count"])
+
             payment = Payment.objects.create(
                 booking=booking,
                 amount_paid=booking.total_amount,
@@ -56,7 +80,9 @@ def checkout(request, booking_id):
             booking.save(update_fields=["status"])
 
         messages.success(request, "Demo payment successful! No real money was charged.")
-        return redirect("payments:detail", payment_id=payment.pk)
+        # The URL pattern is named "payment_detail" in payments/urls.py.
+        # Use that exact name so a successful demo checkout reaches its receipt.
+        return redirect("payments:payment_detail", payment_id=payment.pk)
 
     return render(
         request,

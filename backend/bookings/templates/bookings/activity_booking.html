@@ -44,6 +44,15 @@
                     {{ form.participant_count.errors }}
                 </div>
 
+                <div class="bookings-field">
+                    {{ form.promo_code.label_tag }}
+                    {{ form.promo_code }}
+                    {{ form.promo_code.errors }}
+                    <small class="bookings-muted">
+                        Optional. The final discount is shown after booking.
+                    </small>
+                </div>
+
                 <button type="submit" class="bookings-button bookings-button-primary">
                     Confirm Booking
                 </button>

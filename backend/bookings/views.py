@@ -1,5 +1,6 @@
 
 # Django imports
+from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -15,7 +16,7 @@ from activities.models import Activity, ActivitySlot, ActivityBlockedDate
 from users.models import Customer
 
 # Our BOOKINGS app
-from .models import Booking, Reservation
+from .models import Booking, PromoCode, Reservation
 from .forms import ActivityBookingForm
 
 # Display the bookings belonging to the logged-in customer.
@@ -61,6 +62,36 @@ class BookingDetailView(LoginRequiredMixin, generic.DetailView):
         return Booking.objects.filter(
             customer__user=self.request.user
         )
+
+
+@login_required
+def request_cancellation(request, pk):
+    """Record a simple customer cancellation request for staff review."""
+    booking = get_object_or_404(
+        Booking,
+        pk=pk,
+        customer__user=request.user,
+    )
+
+    # Cancellation changes data, so it must be submitted using POST.
+    if request.method != "POST":
+        return redirect("bookings:booking-detail", pk=booking.pk)
+
+    # Only unpaid/active bookings can be requested for cancellation.
+    if booking.status not in (Booking.Status.PENDING, Booking.Status.CONFIRMED):
+        messages.error(request, "This booking is not eligible for cancellation.")
+        return redirect("bookings:booking-detail", pk=booking.pk)
+
+    if booking.cancellation_requested_at:
+        messages.info(request, "A cancellation request is already awaiting review.")
+        return redirect("bookings:booking-detail", pk=booking.pk)
+
+    booking.cancellation_requested_at = timezone.now()
+    booking.cancellation_reason = request.POST.get("cancellation_reason", "").strip()
+    booking.save(update_fields=["cancellation_requested_at", "cancellation_reason"])
+
+    messages.success(request, "Your cancellation request has been sent for staff review.")
+    return redirect("bookings:booking-detail", pk=booking.pk)
         
 
 # Only logged-in customers can book activities.
@@ -187,13 +218,49 @@ def book_activity(request, activity_id):
 
                     # Save the current price and calculate the booking total.
                     unit_price = slot.activity.current_price
-                    total_price = unit_price * participants
+                    subtotal = unit_price * participants
+
+                    # Re-lock and re-check the optional promo code just before
+                    # saving. This prevents an expired or exhausted code being
+                    # accepted after the customer loaded the form.
+                    promo_code = form.cleaned_data["promo_code"]
+                    discount_amount = 0
+                    if promo_code is not None:
+                        promo_code = PromoCode.objects.select_for_update().get(
+                            pk=promo_code.pk
+                        )
+                        now = timezone.now()
+                        if (
+                            not promo_code.is_active
+                            or not promo_code.valid_from <= now <= promo_code.valid_until
+                            or (
+                                promo_code.max_uses is not None
+                                and promo_code.uses_count >= promo_code.max_uses
+                            )
+                        ):
+                            raise ValidationError(
+                                "This promo code is no longer available."
+                            )
+
+                        # Percentage codes use the activity subtotal. Fixed codes
+                        # never reduce the final booking total below zero.
+                        if promo_code.discount_type == PromoCode.DiscountType.PERCENTAGE:
+                            discount_amount = (
+                                subtotal * promo_code.discount_value / 100
+                            )
+                        else:
+                            discount_amount = promo_code.discount_value
+                        discount_amount = min(discount_amount, subtotal)
+
+                    total_price = subtotal - discount_amount
 
                     # Create the main Booking record.
                     # Status defaults to PENDING in the existing model.
                     booking = Booking.objects.create(
                         customer=customer,
-                        total_amount=total_price
+                        total_amount=total_price,
+                        promo_code=promo_code,
+                        discount_amount=discount_amount,
                     )
 
                     # Create the related activity Reservation record.

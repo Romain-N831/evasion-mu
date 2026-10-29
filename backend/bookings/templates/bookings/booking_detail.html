@@ -38,6 +38,12 @@
             <span>Total amount</span>
             <strong class="bookings-summary-total">Rs {{ booking.total_amount|floatformat:2 }}</strong>
         </div>
+        {% if booking.promo_code %}
+            <div class="bookings-summary-item">
+                <span>Promo discount ({{ booking.promo_code.code }})</span>
+                <strong>Rs {{ booking.discount_amount|floatformat:2 }}</strong>
+            </div>
+        {% endif %}
     </div>
 
     <h2 class="bookings-subheading">Activity reservations</h2>
@@ -101,6 +107,48 @@
     {% empty %}
         <p class="bookings-muted">This booking has no hotel reservations.</p>
     {% endfor %}
+
+    <!-- A pending booking may proceed to the simulated payment page. -->
+    {% if booking.status == "PENDING" %}
+        <section class="bookings-card bookings-reservation-card">
+            <h2>Ready to confirm?</h2>
+            <p>
+                Continue to the demo checkout to confirm this booking.
+                No real money or card details are collected.
+            </p>
+            <a class="bookings-button bookings-button-primary"
+               href="{% url 'payments:checkout' booking.pk %}">
+                Continue to Demo Checkout
+            </a>
+        </section>
+    {% endif %}
+
+    <!-- A request is stored for staff to review in Django Admin. -->
+    {% if booking.status == "PENDING" or booking.status == "CONFIRMED" %}
+        <section class="bookings-card bookings-reservation-card">
+            <h2>Need to cancel?</h2>
+            {% if booking.cancellation_requested_at %}
+                <p>
+                    Cancellation requested on
+                    {{ booking.cancellation_requested_at|date:"d M Y, H:i" }}.
+                    Staff will review your request.
+                </p>
+            {% else %}
+                <p>Send a cancellation request for staff review.</p>
+                <form method="post"
+                      action="{% url 'bookings:request-cancellation' booking.pk %}">
+                    {% csrf_token %}
+                    <label for="cancellation_reason">Reason (optional)</label>
+                    <textarea id="cancellation_reason"
+                              name="cancellation_reason"
+                              rows="3"></textarea>
+                    <button type="submit" class="bookings-button">
+                        Request cancellation
+                    </button>
+                </form>
+            {% endif %}
+        </section>
+    {% endif %}
 
     <a class="bookings-button bookings-button-primary bookings-bottom-link" href="{% url 'bookings:booking-list' %}">
         View my bookings

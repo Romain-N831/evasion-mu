@@ -40,6 +40,23 @@ class BookingAdmin(admin.ModelAdmin):
     readonly_fields = (
         'booking_date',
         'ticket_reference',
+        'cancellation_requested_at',
+    )
+
+    # Make customer cancellation requests visible to staff reviewing bookings.
+    fieldsets = (
+        ('Booking details', {
+            'fields': (
+                'customer', 'booking_date', 'total_amount', 'status',
+                'promo_code', 'discount_amount', 'ticket_reference',
+            ),
+        }),
+        ('Cancellation request', {
+            'fields': ('cancellation_requested_at', 'cancellation_reason'),
+        }),
+        ('Reschedule request', {
+            'fields': ('reschedule_requested_for', 'reschedule_reason'),
+        }),
     )
 
 
