@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ hotel.name }} | Evasion.mu{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'hotels/css/hotel_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="hotel-detail-page">
+
+    <!-- Back navigation -->
+    <a href="{% url 'hotels:list' %}" class="back-link">
+        Back to Hotels
+    </a>
+
+    <div class="hotel-detail-layout">
+
+        <!-- Main hotel information -->
+        <div class="hotel-detail-main">
+
+            <!-- Hotel image -->
+            <div class="hotel-detail-image">
+
+                {% if hotel.image_url %}
+                    <img src="{{ hotel.image_url }}" alt="{{ hotel.name }}">
+                {% elif hotel.static_image %}
+                    <img src="{% static hotel.static_image %}" alt="{{ hotel.name }}">
+                {% else %}
+                    <div class="hotel-detail-image-placeholder">
+                        {{ hotel.name }}
+                    </div>
+                {% endif %}
+
+                {% if hotel.star_rating %}
+                    <span class="hotel-detail-badge">
+                        {{ hotel.star_rating }} Star Hotel
+                    </span>
+                {% endif %}
+
+            </div>
+
+            <!-- Hotel description -->
+            <div class="hotel-detail-description">
+
+                <p class="hotel-detail-eyebrow">DISCOVER YOUR STAY</p>
+
+                <h1>{{ hotel.name }}</h1>
+
+                <p class="hotel-detail-location">
+                    {{ hotel.city }}{% if hotel.city and hotel.region %}, {% endif %}{{ hotel.region }}
+                </p>
+
+                {% if hotel.star_rating %}
+                    <div class="hotel-detail-rating">
+                        {{ hotel.star_rating }} / 5 Stars
+                    </div>
+                {% endif %}
+
+                <p class="hotel-description-text">
+                    {{ hotel.description|default:"Discover a comfortable stay at this hotel." }}
+                </p>
+
+                <!-- Hotel facts -->
+                <div class="hotel-detail-facts">
+
+                    <div class="hotel-detail-fact">
+                        <span>Address</span>
+                        <strong>{{ hotel.address|default:"Not provided" }}</strong>
+                    </div>
+
+                    <div class="hotel-detail-fact">
+                        <span>City</span>
+                        <strong>{{ hotel.city|default:"Not provided" }}</strong>
+                    </div>
+
+                    <div class="hotel-detail-fact">
+                        <span>Region</span>
+                        <strong>{{ hotel.region|default:"Not provided" }}</strong>
+                    </div>
+
+                    <div class="hotel-detail-fact">
+                        <span>Room Types</span>
+                        <strong>{{ room_types|length }} available</strong>
+                    </div>
+
+                </div>
+
+                <!-- Available room types -->
+                <div class="hotel-rooms-section" id="rooms">
+
+                    <h2>Available Room Types</h2>
+
+                    <p class="hotel-rooms-intro">
+                        Explore the different room options available at this hotel.
+                    </p>
+
+                    <div class="hotel-rooms-list">
+
+                        {% for room in room_types %}
+
+                            <div class="hotel-room-card">
+
+                                <div class="hotel-room-info">
+
+                                    <h3>{{ room.name }}</h3>
+
+                                    <p>
+                                        {{ room.description|default:"A comfortable room for your stay." }}
+                                    </p>
+
+                                    <span class="hotel-room-occupancy">
+                                        Maximum occupancy:
+                                        {{ room.max_occupancy }} people
+                                    </span>
+
+                                    <br>
+
+                                    <span class="hotel-room-occupancy">
+                                        Total rooms: {{ room.total_rooms }}
+                                    </span>
+
+                                </div>
+
+                                <div class="hotel-room-price">
+
+                                    <strong>
+                                        Rs {{ room.price_per_night }}
+                                    </strong>
+
+                                    <span>Per night</span>
+
+                                </div>
+
+                            </div>
+
+                        {% empty %}
+
+                            <p>No room types are currently available.</p>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Price sidebar -->
+        <aside class="hotel-price-card">
+
+            <p class="hotel-price-eyebrow">PLAN YOUR STAY</p>
+
+            <span class="hotel-price-label">
+                Starting from
+            </span>
+
+            {% if room_types %}
+                <h2 class="hotel-detail-price">
+                    Rs {{ room_types.0.price_per_night }}
+                </h2>
+                <p class="hotel-price-note">
+                    Per night. Prices may vary depending on the room type.
+                </p>
+            {% else %}
+                <h2 class="hotel-detail-price">
+                    Contact Hotel
+                </h2>
+                <p class="hotel-price-note">
+                    Please contact the hotel for room prices.
+                </p>
+            {% endif %}
+
+            <a href="#rooms" class="hotel-explore-button">
+                Explore Room Types
+            </a>
+
+        </aside>
+
+    </div>
+
+</div>
+
+{% endblock %}

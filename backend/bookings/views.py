@@ -4,7 +4,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseForbidden
-from django.urls import reverse_lazy
 from django.views import generic
 from django.db import transaction
 from django.db.models import Sum, Q
@@ -19,16 +18,6 @@ from users.models import Customer
 from .models import Booking, Reservation
 from .forms import ActivityBookingForm
 
-
-
-# Keep the introductory bookings page available to everyone.
-def index(request):
-    context = {
-        'page_title': 'Bookings',
-    }
-    return render(request, 'bookings/home.html', context)
-
-
 # Display the bookings belonging to the logged-in customer.
 # LoginRequiredMixin must appear before generic.ListView.
 class BookingListView(LoginRequiredMixin, generic.ListView):
@@ -42,8 +31,6 @@ class BookingListView(LoginRequiredMixin, generic.ListView):
     # The template will access the results using "booking_list".
     context_object_name = 'booking_list'
 
-    # Send visitors here if they have not logged in.
-    login_url = reverse_lazy('bookings:login')
 
     # Decide which database records this customer may see.
     def get_queryset(self):
@@ -65,7 +52,6 @@ class BookingDetailView(LoginRequiredMixin, generic.DetailView):
     # The template will access this single record using "booking".
     context_object_name = 'booking'
 
-    login_url = reverse_lazy('bookings:login')
 
     def get_queryset(self):
 
@@ -77,9 +63,8 @@ class BookingDetailView(LoginRequiredMixin, generic.DetailView):
         )
         
 
-# Only logged-in users can access this booking view.
-# Reuse the existing Django login system.
-@login_required(login_url='bookings:login')
+# Only logged-in customers can book activities.
+@login_required
 def book_activity(request, activity_id):
 
     # Find the selected activity.

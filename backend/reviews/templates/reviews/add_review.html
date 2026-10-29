@@ -1,0 +1,124 @@
+
+{% extends "base.html" %}
+
+{% block title %}Write a Review | Evasion.mu{% endblock %}
+
+{% block extra_css %}
+<style>
+    .add-review-page {
+        max-width: 760px;
+        margin: 40px auto;
+        padding: 32px;
+        background: white;
+        border: 1px solid #e0e7ed;
+        border-radius: 18px;
+        box-shadow: 0 8px 28px rgba(20, 50, 70, 0.06);
+        color: #20364a;
+    }
+
+    .add-review-page h1 {
+        margin-top: 0;
+        font-size: 30px;
+    }
+
+    .activity-subtitle {
+        color: #607080;
+        line-height: 1.6;
+    }
+
+    .review-form p {
+        margin-bottom: 22px;
+    }
+
+    .review-form label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+    }
+
+    .review-form select,
+    .review-form textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 12px;
+        border: 1px solid #d5e0e8;
+        border-radius: 9px;
+        font: inherit;
+    }
+
+    .review-form textarea {
+        min-height: 140px;
+        resize: vertical;
+    }
+
+    .submit-review-btn {
+        border: none;
+        background: #397d91;
+        color: white;
+        padding: 13px 22px;
+        border-radius: 9px;
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .submit-review-btn:hover {
+        background: #285f70;
+    }
+
+    .cancel-link {
+        display: inline-block;
+        margin-left: 14px;
+        color: #397d91;
+        text-decoration: none;
+    }
+
+    @media (max-width: 600px) {
+        .add-review-page {
+            margin: 24px 16px;
+            padding: 22px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="add-review-page">
+
+    <h1>Write a Review</h1>
+
+    <p class="activity-subtitle">
+        Share your experience with
+        <strong>{{ activity.title }}</strong>.
+        Your review will be submitted for approval before appearing publicly.
+    </p>
+
+    <form method="post" class="review-form">
+        {% csrf_token %}
+
+        {{ form.non_field_errors }}
+
+        {% for field in form %}
+            <p>
+                {{ field.label_tag }}
+                {{ field }}
+                {{ field.errors }}
+
+                {% if field.help_text %}
+                    <small>{{ field.help_text }}</small>
+                {% endif %}
+            </p>
+        {% endfor %}
+
+        <button type="submit" class="submit-review-btn">
+            Submit Review
+        </button>
+
+        <a class="cancel-link"
+           href="{% url 'activity_reviews' activity.id %}">
+            Cancel
+        </a>
+    </form>
+
+</div>
+{% endblock %}

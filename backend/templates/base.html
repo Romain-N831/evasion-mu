@@ -16,7 +16,7 @@
 </head>
 <body>
     <header class="site-header">
-        <a href="{% url 'home' %}" class="site-logo">
+        <a href="{% url 'core:home' %}" class="site-logo">
             <img
                 src="{% static 'core/images/evasion-logo.jpeg' %}"
                 alt="Evasion.mu logo"
@@ -24,10 +24,10 @@
         </a>
 
         <nav class="site-nav">
-            <a href="{% url 'home' %}">Home</a>
-            <a href="#">Hotels</a>
+            <a href="{% url 'core:home' %}">Home</a>
+            <a href="{% url 'hotels:list' %}">Hotels</a>
             <a href="{% url 'activities:list' %}">Activities</a>
-            <a href="#">About Us</a>
+            <a href="{% url 'core:aboutus' %}">About Us</a>
             {% if user.is_authenticated %}
                 <a
                     href="{% url 'users:profile' %}"

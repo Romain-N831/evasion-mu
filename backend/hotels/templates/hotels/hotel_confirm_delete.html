@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Delete Record | Evasion.mu{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'hotels/css/hotels.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="hotel-form-container">
+
+    <h1>Confirm Delete</h1>
+
+    <p>Are you sure you want to delete "{{ object }}"?</p>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <button type="submit">Yes, Delete</button>
+
+        <a href="{% url 'hotels:list' %}">
+            Cancel
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}

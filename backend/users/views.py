@@ -180,10 +180,80 @@ def resend_verification_code(request):
     return redirect("users:verify")
 
 
+def verify_account(request):
+    user_id = request.session.get("pending_verification_user_id")
+
+    if not user_id:
+        messages.info(
+            request,
+            "Please register to verify your account.",
+        )
+        return redirect("users:register")
+
+    try:
+        customer = Customer.objects.select_related("user").get(
+            user_id=user_id
+        )
+    except Customer.DoesNotExist:
+        request.session.pop("pending_verification_user_id", None)
+        messages.error(request, "We could not find that account.")
+        return redirect("users:register")
+
+    if customer.is_verified:
+        request.session.pop("pending_verification_user_id", None)
+        messages.info(request, "Your account is already verified.")
+        return redirect("users:login")
+
+    if request.method == "POST":
+        form = VerificationCodeForm(request.POST)
+
+        if form.is_valid():
+            if (
+                customer.verification_code == form.cleaned_data["code"]
+                and customer.verification_code_expires_at
+                and customer.verification_code_expires_at > timezone.now()
+            ):
+                customer.is_verified = True
+                customer.verification_code = ""
+                customer.verification_code_expires_at = None
+                customer.save(
+                    update_fields=[
+                        "is_verified",
+                        "verification_code",
+                        "verification_code_expires_at",
+                        "updated_at",
+                    ]
+                )
+
+                request.session.pop("pending_verification_user_id", None)
+
+                messages.success(
+                    request,
+                    "Your account is verified. You can now log in.",
+                )
+                return redirect("core:home")
+
+            form.add_error(
+                "code",
+                "The code is incorrect or has expired. Please try again.",
+            )
+    else:
+        form = VerificationCodeForm()
+
+    return render(
+        request,
+        "users/verify_account.html",
+        {
+            "form": form,
+            "customer": customer,
+        },
+    )
+
+
 class UserLoginView(LoginView):
     template_name = "users/login.html"
     redirect_authenticated_user = True
-    next_page = reverse_lazy("home")
+    next_page = reverse_lazy("core:home")
 
     def form_valid(self, form):
         user = form.get_user()
@@ -209,7 +279,7 @@ class UserLoginView(LoginView):
 
 
 class UserLogoutView(LogoutView):
-    next_page = reverse_lazy("home")
+    next_page = reverse_lazy("core:home")
 
 
 @login_required

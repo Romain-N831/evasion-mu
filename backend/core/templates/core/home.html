@@ -1,11 +1,107 @@
-
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}Home | Evasion.mu{% endblock %}
+{% block title %}Evasion.mu | Discover Mauritius{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/home.css' %}">
+{% endblock %}
 
 {% block content %}
-    <section class="home-hero">
-        <h1>Welcome to Evasion.mu</h1>
-        <p>Discover hotels, activities and experiences in Mauritius.</p>
-    </section>
+<div class="homepage">
+<section class="hero">
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content">
+        <p class="hero-tagline">DISCOVER THE BEAUTY OF MAURITIUS</p>
+        <h1>Your island adventure starts here.</h1>
+        <p class="hero-description">
+            Explore breathtaking landscapes, unforgettable activities
+            and amazing places to stay across Mauritius.
+        </p>
+
+        <div class="hero-buttons">
+            <a href="{% url 'activities:list' %}" class="btn btn-primary">
+                Explore Activities
+            </a>
+            <a href="{% url 'hotels:list' %}" class="btn btn-secondary">
+                Discover Hotels
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="welcome-section">
+    <p class="section-tag">YOUR NEXT ADVENTURE</p>
+    <h2>Experience Mauritius your way</h2>
+    <p>
+        From crystal-clear lagoons to exciting island adventures,
+        discover experiences that make every moment special.
+    </p>
+</section>
+
+<section class="activities-section">
+    <div class="section-heading">
+        <div>
+            <p class="section-tag">EXPLORE THE ISLAND</p>
+            <h2>Popular activities</h2>
+        </div>
+        <a href="{% url 'activities:list' %}" class="view-all">
+            View all activities →
+        </a>
+    </div>
+
+    <div class="activity-grid">
+        {% for activity in activities %}
+        <article class="activity-card">
+            {% if activity.title == "Blue Bay Snorkelling" %}
+                <img src="{% static 'activities/images/Blue_Bay.jpg' %}" alt="{{ activity.title }}">
+            {% elif activity.title == "Casela Nature Adventure" %}
+                <img src="{% static 'activities/images/casela.jpg' %}" alt="{{ activity.title }}">
+            {% elif activity.title == "Chamarel Seven Coloured Earth" %}
+                <img src="{% static 'activities/images/chamarel.jpg' %}" alt="{{ activity.title }}">
+            {% elif activity.title == "Ile aux Cerfs Boat Trip" %}
+                <img src="{% static 'activities/images/ile_aux_cerfs.jpg' %}" alt="{{ activity.title }}">
+            {% elif activity.title == "Dolphin Watching Excursion" %}
+                <img src="{% static 'activities/images/Dolphin_watching.jpg' %}" alt="{{ activity.title }}">
+            {% elif activity.title == "Le Morne Guided Hike" %}
+                <img src="{% static 'activities/images/Le_Morne.jpg' %}" alt="{{ activity.title }}">
+            {% elif activity.title == "Northern Islands Cruise" %}
+                <img src="{% static 'activities/images/Northen_Islands.jpg' %}" alt="{{ activity.title }}">
+            {% elif activity.title == "Port Louis Cultural Tour" %}
+                <img src="{% static 'activities/images/Port_Louis.jpg' %}" alt="{{ activity.title }}">
+            {% endif %}
+
+            <div class="activity-card-content">
+                <p class="activity-location">{{ activity.location }}</p>
+                <h3>{{ activity.title }}</h3>
+                <p class="activity-description">
+                    {{ activity.description|truncatewords:18 }}
+                </p>
+                <div class="activity-card-footer">
+                    <span class="activity-price">
+                        Rs {{ activity.current_price }}
+                    </span>
+                    <a href="{% url 'activities:detail' activity.id %}">
+                        Explore →
+                    </a>
+                </div>
+            </div>
+        </article>
+        {% empty %}
+        <p class="empty-message">
+            Our activities are coming soon. Check back for island adventures!
+        </p>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="cta-section">
+    <h2>Ready to discover Mauritius?</h2>
+    <p>Your next unforgettable experience is just a click away.</p>
+    <a href="{% url 'activities:list' %}" class="btn btn-primary">
+        Start Exploring
+    </a>
+</section>
+</div>
 {% endblock %}
