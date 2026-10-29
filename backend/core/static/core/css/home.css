@@ -95,8 +95,13 @@
 }
 
 /* ACTIVITIES */
-.activities-section {
+.activities-section,
+.hotels-section {
     padding: 35px 8% 80px;
+}
+
+.hotels-section {
+    padding-top: 0;
 }
 
 .section-heading {
@@ -113,13 +118,41 @@
     font-weight: 700;
 }
 
-.activity-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 25px;
+.carousel {
+    position: relative;
 }
 
-.activity-card {
+.carousel-track {
+    display: flex;
+    gap: 25px;
+    overflow-x: auto;
+    padding: 2px 0 16px;
+    scrollbar-width: thin;
+    scroll-behavior: smooth;
+    scroll-snap-type: x proximity;
+    overscroll-behavior-inline: contain;
+}
+
+.activity-card,
+.hotel-card {
+    /* Four compact cards fit comfortably on typical laptop screens, while a
+       partial next card still signals that the row can be scrolled. */
+    flex: 0 0 clamp(240px, 22vw, 280px);
+    width: clamp(240px, 22vw, 280px);
+    min-width: clamp(240px, 22vw, 280px);
+    max-width: clamp(240px, 22vw, 280px);
+    scroll-snap-align: start;
+}
+
+/* Keep homepage cards compact even if a shared card rule is loaded later. */
+.carousel-track > .activity-card,
+.carousel-track > .hotel-card {
+    flex-grow: 0;
+    flex-shrink: 0;
+}
+
+.activity-card,
+.hotel-card {
     overflow: hidden;
     background: white;
     border: 1px solid #e8eeee;
@@ -128,20 +161,34 @@
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.activity-card:hover {
+.activity-card:hover,
+.hotel-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 12px 28px rgba(20, 50, 50, 0.12);
 }
 
-.activity-card img {
+.activity-card img,
+.hotel-card-image img {
     display: block;
     width: 100%;
-    height: 210px;
+    height: 165px;
     object-fit: cover;
 }
 
-.activity-card-content {
+.card-image-placeholder {
+    display: grid;
+    width: 100%;
+    height: 165px;
+    place-items: center;
     padding: 20px;
+    background: linear-gradient(135deg, #d8f1ec, #9ccfc8);
+    color: #163b40;
+    font-weight: 700;
+    text-align: center;
+}
+
+.activity-card-content {
+    padding: 16px;
 }
 
 .activity-location {
@@ -160,7 +207,7 @@
     color: #6a7779;
     line-height: 1.6;
     font-size: 14px;
-    min-height: 44px;
+    min-height: 40px;
 }
 
 .activity-card-footer {
@@ -169,8 +216,8 @@
     align-items: center;
     gap: 10px;
     border-top: 1px solid #edf0f0;
-    padding-top: 16px;
-    margin-top: 18px;
+    padding-top: 12px;
+    margin-top: 14px;
 }
 
 .activity-price {
@@ -183,6 +230,80 @@
     font-weight: 700;
     text-decoration: none;
 }
+
+.hotel-card-content {
+    display: flex;
+    min-height: 145px;
+    padding: 16px;
+    flex-direction: column;
+}
+
+.hotel-location,
+.hotel-rating {
+    margin: 0 0 8px;
+    color: #0b8c82;
+    font-size: 13px;
+}
+
+.hotel-rating {
+    color: #657477;
+}
+
+.hotel-card h3 {
+    margin: 0 0 10px;
+    color: #173c40;
+    font-size: 19px;
+}
+
+.hotel-card-footer {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid #edf0f0;
+}
+
+.hotel-card-footer a {
+    color: #087f78;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.carousel-control {
+    position: absolute;
+    z-index: 1;
+    top: 82px;
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border: 1px solid #d5e5e3;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 4px 14px rgba(20, 50, 50, 0.16);
+    color: #087f78;
+    cursor: pointer;
+    font-size: 32px;
+    line-height: 1;
+}
+
+.carousel-control:hover {
+    background: #eaf6f3;
+}
+
+.carousel-control:focus-visible,
+.carousel-track:focus-visible,
+.view-all:focus-visible,
+.activity-card-footer a:focus-visible,
+.hotel-card-footer a:focus-visible {
+    outline: 3px solid #159b91;
+    outline-offset: 3px;
+}
+
+.carousel-control:disabled {
+    visibility: hidden;
+}
+
+.carousel-control-previous { left: -21px; }
+.carousel-control-next { right: -21px; }
 
 .empty-message {
     grid-column: 1 / -1;
@@ -207,9 +328,15 @@
 
 /* RESPONSIVE */
 @media (max-width: 900px) {
-    .activity-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+    .activity-card,
+    .hotel-card {
+        flex-basis: min(38vw, 280px);
+        width: min(38vw, 280px);
+        min-width: min(38vw, 280px);
+        max-width: min(38vw, 280px);
     }
+    .carousel-control-previous { left: -15px; }
+    .carousel-control-next { right: -15px; }
 }
 
 @media (max-width: 600px) {
@@ -227,14 +354,29 @@
         flex-direction: column;
     }
 
-    .activities-section {
+    .activities-section,
+    .hotels-section {
         padding-right: 6%;
         padding-left: 6%;
     }
 
-    .activity-grid {
-        grid-template-columns: 1fr;
+    .activities-section { padding-bottom: 55px; }
+
+    .activity-card,
+    .hotel-card {
+        flex-basis: 80vw;
+        width: 80vw;
+        min-width: 80vw;
+        max-width: 80vw;
     }
+
+    .activity-card img,
+    .hotel-card-image img,
+    .card-image-placeholder { height: 180px; }
+
+    .carousel-track { gap: 16px; }
+
+    .carousel-control { display: none; }
 
     .cta-section {
         margin-right: 6%;

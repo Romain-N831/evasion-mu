@@ -4,7 +4,39 @@ from django.db.models import Sum, Q, F
 from django.utils import timezone
 
 from activities.models import ActivitySlot, ActivityBlockedDate
+from hotels.models import RoomType
 from .models import Booking, PromoCode
+
+
+class HotelBookingForm(forms.Form):
+    """Server-side validation for one room type at a selected hotel."""
+
+    check_in = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}))
+    check_out = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}))
+    rooms_count = forms.IntegerField(min_value=1, label="Number of rooms")
+    guests_count = forms.IntegerField(min_value=1, label="Number of guests")
+
+    def __init__(self, *args, room_type, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.room_type = room_type
+
+    def clean(self):
+        cleaned_data = super().clean()
+        check_in = cleaned_data.get("check_in")
+        check_out = cleaned_data.get("check_out")
+        rooms_count = cleaned_data.get("rooms_count")
+        guests_count = cleaned_data.get("guests_count")
+
+        if check_in and check_in < timezone.localdate():
+            self.add_error("check_in", "Check-in cannot be in the past.")
+        if check_in and check_out and check_out <= check_in:
+            self.add_error("check_out", "Check-out must be after check-in.")
+        if rooms_count and guests_count and guests_count > rooms_count * self.room_type.max_occupancy:
+            self.add_error(
+                "guests_count",
+                f"This room type accommodates at most {self.room_type.max_occupancy} guests per room.",
+            )
+        return cleaned_data
 
 
 # Form used by customers when booking an activity.

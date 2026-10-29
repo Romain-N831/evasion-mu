@@ -132,6 +132,18 @@
 
                                     <span>Per night</span>
 
+                                    {% if user.is_authenticated %}
+                                        <a class="hotel-explore-button"
+                                           href="{% url 'bookings:book-hotel' hotel.pk room.pk %}">
+                                            Book this room
+                                        </a>
+                                    {% else %}
+                                        <a class="hotel-explore-button"
+                                           href="{% url 'users:login' %}?next={% url 'bookings:book-hotel' hotel.pk room.pk %}">
+                                            Log in to book
+                                        </a>
+                                    {% endif %}
+
                                     <!-- Room types, rather than whole hotels, are wishlist items. -->
                                     {% if user.is_authenticated %}
                                         <form method="post" action="{% url 'wishlist:add' %}">

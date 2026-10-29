@@ -10,6 +10,7 @@ app_name = 'bookings'
 
 
 urlpatterns = [
+    path('hotel/<int:hotel_id>/room/<int:room_type_id>/', views.book_hotel, name='book-hotel'),
     # Customer cancellation request for one owned booking.
     path(
         '<int:pk>/cancel/',

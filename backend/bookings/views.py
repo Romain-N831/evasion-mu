@@ -16,8 +16,19 @@ from activities.models import Activity, ActivitySlot, ActivityBlockedDate
 from users.models import Customer
 
 # Our BOOKINGS app
-from .models import Booking, PromoCode, Reservation
-from .forms import ActivityBookingForm
+from hotels.models import Hotel, RoomAvailability, RoomType
+from payments.models import Payment
+from .models import Booking, HotelReservation, PromoCode, Reservation
+from .forms import ActivityBookingForm, HotelBookingForm
+
+
+def _stay_dates(check_in, check_out):
+    """Yield each occupied night; check-out itself does not consume a room."""
+    from datetime import timedelta
+    current = check_in
+    while current < check_out:
+        yield current
+        current += timedelta(days=1)
 
 # Display the bookings belonging to the logged-in customer.
 # LoginRequiredMixin must appear before generic.ListView.
@@ -66,7 +77,7 @@ class BookingDetailView(LoginRequiredMixin, generic.DetailView):
 
 @login_required
 def request_cancellation(request, pk):
-    """Record a simple customer cancellation request for staff review."""
+    """Cancel an owned booking and release hotel inventory exactly once."""
     booking = get_object_or_404(
         Booking,
         pk=pk,
@@ -82,16 +93,135 @@ def request_cancellation(request, pk):
         messages.error(request, "This booking is not eligible for cancellation.")
         return redirect("bookings:booking-detail", pk=booking.pk)
 
-    if booking.cancellation_requested_at:
-        messages.info(request, "A cancellation request is already awaiting review.")
+    # Keep the pre-existing activity-only workflow as a staff-reviewed
+    # cancellation request. Hotel reservations are cancelled immediately so
+    # their per-night inventory can be restored atomically.
+    if not booking.hotel_reservations.exists():
+        if booking.cancellation_requested_at:
+            messages.info(request, "A cancellation request is already awaiting review.")
+            return redirect("bookings:booking-detail", pk=booking.pk)
+        booking.cancellation_requested_at = timezone.now()
+        booking.cancellation_reason = request.POST.get("cancellation_reason", "").strip()
+        booking.save(update_fields=["cancellation_requested_at", "cancellation_reason"])
+        messages.success(request, "Your cancellation request has been sent for staff review.")
         return redirect("bookings:booking-detail", pk=booking.pk)
 
-    booking.cancellation_requested_at = timezone.now()
-    booking.cancellation_reason = request.POST.get("cancellation_reason", "").strip()
-    booking.save(update_fields=["cancellation_requested_at", "cancellation_reason"])
+    try:
+        with transaction.atomic():
+            booking = Booking.objects.select_for_update().get(pk=booking.pk)
+            if booking.status == Booking.Status.CANCELLED:
+                messages.info(request, "This booking has already been cancelled.")
+                return redirect("bookings:booking-detail", pk=booking.pk)
 
-    messages.success(request, "Your cancellation request has been sent for staff review.")
+            reservations = list(
+                HotelReservation.objects.select_for_update().filter(booking=booking)
+            )
+        # Lock the room types before their availability rows. This also
+        # serializes a cancellation with a booking attempt when a date row is
+        # unexpectedly absent.
+            for reservation in reservations:
+                RoomType.objects.select_for_update().get(pk=reservation.room_type_id)
+                if reservation.inventory_released:
+                    continue
+                availability = list(RoomAvailability.objects.select_for_update().filter(
+                    room_type_id=reservation.room_type_id,
+                    date__gte=reservation.check_in,
+                    date__lt=reservation.check_out,
+                ))
+                by_date = {row.date: row for row in availability}
+            # A reservation created by this workflow always has every row. Do
+            # not invent inventory if legacy data has been manually damaged.
+                if any(day not in by_date for day in _stay_dates(reservation.check_in, reservation.check_out)):
+                    raise ValidationError("Hotel inventory cannot be restored because availability records are missing.")
+                for row in availability:
+                    row.available_rooms += reservation.rooms_count
+                    row.save(update_fields=["available_rooms"])
+                reservation.inventory_released = True
+                reservation.save(update_fields=["inventory_released"])
+
+            booking.status = Booking.Status.CANCELLED
+            booking.cancellation_requested_at = timezone.now()
+            booking.cancellation_reason = request.POST.get("cancellation_reason", "").strip()
+            booking.save(update_fields=["status", "cancellation_requested_at", "cancellation_reason"])
+
+            # The project deliberately uses demo payments. A confirmed hotel
+            # booking therefore receives a matching simulated refund rather
+            # than being left cancelled while its successful payment remains
+            # unaccounted for.
+            import uuid
+            successful_payments = Payment.objects.select_for_update().filter(
+                booking=booking,
+                transaction_type=Payment.TransactionType.PAYMENT,
+                status=Payment.Status.SUCCESSFUL,
+            )
+            for payment in successful_payments:
+                Payment.objects.create(
+                    booking=booking,
+                    amount_paid=payment.amount_paid,
+                    payment_method=Payment.Method.DEMO,
+                    status=Payment.Status.REFUNDED,
+                    transaction_type=Payment.TransactionType.REFUND,
+                    transaction_reference=f"DEMO-REFUND-{uuid.uuid4().hex[:12].upper()}",
+                )
+    except ValidationError as error:
+        messages.error(request, error.message)
+        return redirect("bookings:booking-detail", pk=booking.pk)
+
+    messages.success(request, "Your hotel booking has been cancelled.")
     return redirect("bookings:booking-detail", pk=booking.pk)
+
+
+@login_required
+def book_hotel(request, hotel_id, room_type_id):
+    """Reserve a hotel room type, with nightly inventory protected by locks."""
+    hotel = get_object_or_404(Hotel, pk=hotel_id, is_active=True)
+    room_type = get_object_or_404(RoomType, pk=room_type_id, hotel=hotel, is_active=True)
+    customer = Customer.objects.filter(user=request.user).first()
+    if customer is None:
+        return HttpResponseForbidden("You need a Customer profile to make a booking.")
+
+    form = HotelBookingForm(request.POST or None, room_type=room_type)
+    if request.method == "POST" and form.is_valid():
+        check_in = form.cleaned_data["check_in"]
+        check_out = form.cleaned_data["check_out"]
+        rooms_count = form.cleaned_data["rooms_count"]
+        guests_count = form.cleaned_data["guests_count"]
+        try:
+            with transaction.atomic():
+                locked_room_type = RoomType.objects.select_for_update().select_related("hotel").get(pk=room_type.pk)
+                if not locked_room_type.is_active or not locked_room_type.hotel.is_active:
+                    raise ValidationError("This room type is no longer available.")
+                dates = list(_stay_dates(check_in, check_out))
+                availability = list(RoomAvailability.objects.select_for_update().filter(
+                    room_type=locked_room_type, date__gte=check_in, date__lt=check_out
+                ).order_by("date"))
+                by_date = {row.date: row for row in availability}
+                missing_dates = [day for day in dates if day not in by_date]
+                if missing_dates:
+                    raise ValidationError("Availability has not been configured for every night of this stay.")
+                unavailable = [row.date for row in availability if row.available_rooms < rooms_count]
+                if unavailable:
+                    raise ValidationError("There are not enough rooms available for every night of this stay.")
+
+                nightly_price = locked_room_type.price_per_night
+                total = nightly_price * rooms_count * len(dates)
+                booking = Booking.objects.create(customer=customer, total_amount=total)
+                HotelReservation.objects.create(
+                    booking=booking, room_type=locked_room_type,
+                    check_in=check_in, check_out=check_out,
+                    rooms_count=rooms_count, guests_count=guests_count,
+                    price_per_night=nightly_price,
+                )
+                for row in availability:
+                    row.available_rooms -= rooms_count
+                    row.save(update_fields=["available_rooms"])
+            return redirect("bookings:booking-detail", pk=booking.pk)
+        except ValidationError as error:
+            form.add_error(None, error)
+
+    return render(request, "bookings/hotel_booking.html", {
+        "hotel": hotel, "room_type": room_type, "form": form,
+    })
         
 
 # Only logged-in customers can book activities.

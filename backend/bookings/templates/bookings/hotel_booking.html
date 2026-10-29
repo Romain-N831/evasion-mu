@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Book {{ room_type.name }} | Evasion.mu{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'bookings/css/bookings.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="bookings-page">
+    <a class="bookings-back-link" href="{% url 'hotels:detail' hotel.pk %}">&larr; Back to {{ hotel.name }}</a>
+    <div class="bookings-heading">
+        <span class="bookings-eyebrow">HOTEL RESERVATION</span>
+        <h1>Book {{ room_type.name }}</h1>
+        <p>{{ hotel.name }} · up to {{ room_type.max_occupancy }} guests per room</p>
+    </div>
+    <div class="bookings-form-layout">
+        <div class="bookings-card">
+            <h2>Stay details</h2>
+            <form method="post" class="bookings-form">
+                {% csrf_token %}
+                {% if form.non_field_errors %}<div class="bookings-errors">{{ form.non_field_errors }}</div>{% endif %}
+                {% for field in form %}
+                    <div class="bookings-field">{{ field.label_tag }}{{ field }}{{ field.errors }}</div>
+                {% endfor %}
+                <button type="submit" class="bookings-button bookings-button-primary">Reserve and continue to demo payment</button>
+            </form>
+        </div>
+        <aside class="bookings-card bookings-price-card">
+            <span class="bookings-eyebrow">PRICE</span>
+            <h2>{{ room_type.name }}</h2>
+            <div class="bookings-price-row"><span>Nightly price per room</span><strong>Rs {{ room_type.price_per_night|floatformat:2 }}</strong></div>
+            <p class="bookings-price-note">Your total is calculated securely as rooms × nights × nightly price when you submit. Availability must exist for every night.</p>
+        </aside>
+    </div>
+</section>
+{% endblock %}

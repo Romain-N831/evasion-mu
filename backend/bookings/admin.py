@@ -101,7 +101,9 @@ class HotelReservationAdmin(admin.ModelAdmin):
         'check_in',
         'check_out',
         'rooms_count',
+        'guests_count',
         'price_per_night',
+        'inventory_released',
     )
 
     # Allow administrators to filter hotel reservations by stay dates.

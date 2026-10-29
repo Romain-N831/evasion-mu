@@ -99,6 +99,10 @@
                     <strong>{{ reservation.rooms_count }}</strong>
                 </div>
                 <div class="bookings-info-item">
+                    <span>Guests</span>
+                    <strong>{{ reservation.guests_count }}</strong>
+                </div>
+                <div class="bookings-info-item">
                     <span>Price per room per night</span>
                     <strong>Rs {{ reservation.price_per_night|floatformat:2 }}</strong>
                 </div>
@@ -131,10 +135,14 @@
                 <p>
                     Cancellation requested on
                     {{ booking.cancellation_requested_at|date:"d M Y, H:i" }}.
-                    Staff will review your request.
+                    This reservation has been cancelled.
                 </p>
             {% else %}
-                <p>Send a cancellation request for staff review.</p>
+                {% if booking.hotel_reservations.all %}
+                    <p>Cancelling will immediately release your reserved hotel rooms.</p>
+                {% else %}
+                    <p>Send a cancellation request for staff review.</p>
+                {% endif %}
                 <form method="post"
                       action="{% url 'bookings:request-cancellation' booking.pk %}">
                     {% csrf_token %}
@@ -143,7 +151,7 @@
                               name="cancellation_reason"
                               rows="3"></textarea>
                     <button type="submit" class="bookings-button">
-                        Request cancellation
+                        {% if booking.hotel_reservations.all %}Cancel booking{% else %}Request cancellation{% endif %}
                     </button>
                 </form>
             {% endif %}
