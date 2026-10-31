@@ -86,14 +86,19 @@ class HotelReservation(models.Model):
     check_in = models.DateField()
     check_out = models.DateField()
     rooms_count = models.PositiveSmallIntegerField(default=1)
+    guests_count = models.PositiveSmallIntegerField(default=1)
     price_per_night = models.DecimalField(max_digits=10, decimal_places=2,
                                           validators=[MinValueValidator(0)])
+    # This marker makes inventory restoration safe when cancellation requests
+    # are retried or an administrator revisits a cancelled booking.
+    inventory_released = models.BooleanField(default=False)
 
     class Meta:
         constraints = [
             models.CheckConstraint(condition=models.Q(check_out__gt=models.F("check_in")),
                                    name="hotel_reservation_checkout_after_checkin"),
             models.CheckConstraint(condition=models.Q(rooms_count__gte=1), name="hotel_reservation_rooms_positive"),
+            models.CheckConstraint(condition=models.Q(guests_count__gte=1), name="hotel_reservation_guests_positive"),
             models.CheckConstraint(condition=models.Q(price_per_night__gte=0),
                                    name="hotel_reservation_price_non_negative"),
         ]

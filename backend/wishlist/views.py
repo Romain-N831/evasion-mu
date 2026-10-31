@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
@@ -64,16 +65,21 @@ def add_to_wishlist(request):
 
     if activity_id:
         activity = get_object_or_404(Activity, pk=activity_id, is_active=True)
-        WishlistItem.objects.get_or_create(
+        item, item_created = WishlistItem.objects.get_or_create(
             wishlist=wishlist,
             activity=activity,
         )
     else:
         room_type = get_object_or_404(RoomType, pk=room_type_id, is_active=True)
-        WishlistItem.objects.get_or_create(
+        item, item_created = WishlistItem.objects.get_or_create(
             wishlist=wishlist,
             room_type=room_type,
         )
+
+    if item_created:
+        messages.success(request, "Added to your wishlist.")
+    else:
+        messages.info(request, "This item is already in your wishlist.")
 
     return redirect("wishlist:detail")
 
@@ -90,5 +96,7 @@ def remove_from_wishlist(request, item_id):
         wishlist=wishlist,
     )
     item.delete()
+
+    messages.success(request, "Removed from your wishlist.")
 
     return redirect("wishlist:detail")

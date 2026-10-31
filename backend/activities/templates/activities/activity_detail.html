@@ -188,6 +188,22 @@
     </a>
 {% endif %}
 
+            <!-- Saving an activity does not depend on any available slot. -->
+            {% if user.is_authenticated %}
+                <form method="post" action="{% url 'wishlist:add' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="activity_id" value="{{ activity.pk }}">
+                    <button type="submit" class="explore-button" style="margin-top: 12px;">
+                        Add to Wishlist
+                    </button>
+                </form>
+            {% else %}
+                <a href="{% url 'users:login' %}?next={{ request.path }}"
+                   class="explore-button" style="margin-top: 12px;">
+                    Log in to save
+                </a>
+            {% endif %}
+
 
             <a href="{% url 'activities:list' %}" class="explore-button"  style="margin-top: 12px;">
                 Explore more activities

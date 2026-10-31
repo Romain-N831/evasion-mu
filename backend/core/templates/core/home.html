@@ -4,7 +4,7 @@
 {% block title %}Evasion.mu | Discover Mauritius{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'core/css/home.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/home.css' %}?v=carousel-compact-2">
 {% endblock %}
 
 {% block content %}
@@ -51,7 +51,13 @@
         </a>
     </div>
 
-    <div class="activity-grid">
+    {% if activities %}
+    <div class="carousel" data-carousel>
+        <button class="carousel-control carousel-control-previous" type="button"
+                data-carousel-previous aria-label="Show previous activities">
+            <span aria-hidden="true">‹</span>
+        </button>
+        <div class="carousel-track" data-carousel-track tabindex="0" role="region" aria-label="Popular activities">
         {% for activity in activities %}
         <article class="activity-card">
             {% if activity.title == "Blue Bay Snorkelling" %}
@@ -70,10 +76,14 @@
                 <img src="{% static 'activities/images/Northen_Islands.jpg' %}" alt="{{ activity.title }}">
             {% elif activity.title == "Port Louis Cultural Tour" %}
                 <img src="{% static 'activities/images/Port_Louis.jpg' %}" alt="{{ activity.title }}">
+            {% elif activity.image_url %}
+                <img src="{{ activity.image_url }}" alt="{{ activity.title }}" loading="lazy">
+            {% else %}
+                <div class="card-image-placeholder">{{ activity.category|default:"Mauritius experience" }}</div>
             {% endif %}
 
             <div class="activity-card-content">
-                <p class="activity-location">{{ activity.location }}</p>
+                <p class="activity-location">{{ activity.location }}{% if activity.category %} · {{ activity.category }}{% endif %}</p>
                 <h3>{{ activity.title }}</h3>
                 <p class="activity-description">
                     {{ activity.description|truncatewords:18 }}
@@ -88,12 +98,62 @@
                 </div>
             </div>
         </article>
-        {% empty %}
-        <p class="empty-message">
-            Our activities are coming soon. Check back for island adventures!
-        </p>
         {% endfor %}
+        </div>
+        <button class="carousel-control carousel-control-next" type="button"
+                data-carousel-next aria-label="Show more activities">
+            <span aria-hidden="true">›</span>
+        </button>
     </div>
+    {% else %}
+        <p class="empty-message">Our activities are coming soon. Check back for island adventures!</p>
+    {% endif %}
+</section>
+
+<section class="hotels-section">
+    <div class="section-heading">
+        <div>
+            <p class="section-tag">STAY IN COMFORT</p>
+            <h2>Popular hotels</h2>
+        </div>
+        <a href="{% url 'hotels:list' %}" class="view-all">View all hotels →</a>
+    </div>
+
+    {% if hotels %}
+    <div class="carousel" data-carousel>
+        <button class="carousel-control carousel-control-previous" type="button"
+                data-carousel-previous aria-label="Show previous hotels"><span aria-hidden="true">‹</span></button>
+        <div class="carousel-track" data-carousel-track tabindex="0" role="region" aria-label="Popular hotels">
+            {% for hotel in hotels %}
+            <article class="hotel-card">
+                <div class="hotel-card-image">
+                    {% if hotel.image_path %}
+                        <img src="{% static hotel.image_path %}" alt="{{ hotel.name }}" loading="lazy">
+                    {% elif hotel.static_image %}
+                        <img src="{% static hotel.static_image %}" alt="{{ hotel.name }}" loading="lazy">
+                    {% elif hotel.image_url %}
+                        <img src="{{ hotel.image_url }}" alt="{{ hotel.name }}" loading="lazy">
+                    {% else %}
+                        <div class="card-image-placeholder">Mauritius hotel</div>
+                    {% endif %}
+                </div>
+                <div class="hotel-card-content">
+                    <p class="hotel-location">{{ hotel.city }}{% if hotel.city and hotel.region %}, {% endif %}{{ hotel.region }}</p>
+                    <h3>{{ hotel.name }}</h3>
+                    {% if hotel.star_rating %}<p class="hotel-rating">{{ hotel.star_rating }} Star Hotel</p>{% endif %}
+                    <div class="hotel-card-footer">
+                        <a href="{% url 'hotels:detail' hotel.id %}">View hotel →</a>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        <button class="carousel-control carousel-control-next" type="button"
+                data-carousel-next aria-label="Show more hotels"><span aria-hidden="true">›</span></button>
+    </div>
+    {% else %}
+        <p class="empty-message">Our hotel collection is coming soon. Please check back shortly.</p>
+    {% endif %}
 </section>
 
 <section class="cta-section">
@@ -104,4 +164,31 @@
     </a>
 </section>
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll("[data-carousel]").forEach(function (carousel) {
+        const track = carousel.querySelector("[data-carousel-track]");
+        const previous = carousel.querySelector("[data-carousel-previous]");
+        const next = carousel.querySelector("[data-carousel-next]");
+        const scrollAmount = () => Math.max(track.clientWidth * 0.82, 280);
+        const updateControls = () => {
+            const canScroll = track.scrollWidth > track.clientWidth + 1;
+            previous.disabled = !canScroll || track.scrollLeft <= 1;
+            next.disabled = !canScroll || track.scrollLeft >= track.scrollWidth - track.clientWidth - 1;
+            carousel.classList.toggle("carousel-static", !canScroll);
+        };
+        previous.addEventListener("click", () => track.scrollBy({left: -scrollAmount(), behavior: "smooth"}));
+        next.addEventListener("click", () => track.scrollBy({left: scrollAmount(), behavior: "smooth"}));
+        track.addEventListener("scroll", updateControls, {passive: true});
+        track.addEventListener("wheel", function (event) {
+            if (Math.abs(event.deltaY) > Math.abs(event.deltaX) && track.scrollWidth > track.clientWidth) {
+                event.preventDefault();
+                track.scrollBy({left: event.deltaY, behavior: "auto"});
+            }
+        }, {passive: false});
+        new ResizeObserver(updateControls).observe(track);
+        updateControls();
+    });
+});
+</script>
 {% endblock %}

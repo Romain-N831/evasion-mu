@@ -3,136 +3,77 @@
 {% load static %}
 
 {% block title %}My Profile | Evasion.mu{% endblock %}
-
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'users/css/users.css' %}">
-{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'users/css/users.css' %}">{% endblock %}
 
 {% block content %}
 <section class="users-page">
-
-    <div class="users-page-heading">
-        <p class="users-eyebrow">YOUR EVASION.MU ACCOUNT</p>
-        <h1>My Profile</h1>
-        <p>Keep your details up to date and review your recent travel activity.</p>
-    </div>
+    <div class="users-page-heading"><p class="users-eyebrow">YOUR EVASION.MU ACCOUNT</p><h1>My Profile</h1><p>Keep your details up to date and review your recent travel activity.</p></div>
 
     {% if messages %}
         {% for message in messages %}
-            <div class="users-alert users-alert-{{ message.tags|default:'info' }}" role="status">
-                {{ message }}
-            </div>
+            <div class="users-alert users-alert-{{ message.tags|default:'info' }}" role="status">{{ message }}</div>
         {% endfor %}
     {% endif %}
 
-    <div class="users-profile-grid">
+    <div class="users-profile-grid"><div class="users-card"><h2 class="users-section-title">Personal details</h2><p class="users-section-copy">These details are used for your Evasion.mu bookings.</p>
+    <form method="post" class="users-form">
+        {% csrf_token %}
+        {% for field in form %}<div class="users-form-field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}</div>{% endfor %}
+        <button type="submit" class="users-button">Save changes</button>
+    </form>
 
-        <div class="users-card">
-            <h2 class="users-section-title">Personal Details</h2>
-            <p class="users-section-copy">
-                These details are used for your Evasion.mu bookings.
-            </p>
+    </div><aside>
+    <div class="users-card users-settings-card"><h2 class="users-section-title">Account settings</h2>
+    <p>
+        <a class="users-text-link" href="{% url 'wishlist:detail' %}">
+            View my wishlist
+        </a>
+    </p>
+    <p>
+        <a class="users-text-link" href="{% url 'users:password_change' %}">
+            Change password
+        </a>
+    </p>
 
-            <form method="post" class="users-form">
-                {% csrf_token %}
+    <form method="post" action="{% url 'users:logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="users-button users-button-danger">Log out</button>
+    </form>
 
-                {% for field in form %}
-                    <div class="users-form-field">
-                        <label for="{{ field.id_for_label }}">
-                            {{ field.label }}
-                        </label>
-
-                        {{ field }}
-
-                        {% for error in field.errors %}
-                            <div class="users-errorlist">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                {% endfor %}
-
-                <button type="submit" class="users-button">
-                    Save Changes
-                </button>
-            </form>
-        </div>
-
-        <aside>
-            <div class="users-card users-settings-card">
-                <h2 class="users-section-title">Account Settings</h2>
-
-                <p>
-                    <a class="users-text-link" href="{% url 'users:password_change' %}">
-                        Change Password
+    </div><div class="users-card users-settings-card"><h2 class="users-section-title">Recent bookings</h2>
+    {% if recent_bookings %}
+        <ul class="users-list">
+            {% for booking in recent_bookings %}
+                <li>
+                    Booking #{{ booking.pk }} —
+                    {{ booking.get_status_display }} —
+                    {{ booking.total_amount }}
+                    <a class="users-text-link" href="{% url 'bookings:booking-detail' booking.pk %}">
+                        View details
                     </a>
-                </p>
+                </li>
+            {% endfor %}
+        </ul>
+        <a class="users-text-link" href="{% url 'bookings:booking-list' %}">
+            View all my bookings
+        </a>
+    {% else %}
+        <p>You have no bookings yet.</p>
+    {% endif %}
 
-                <form method="post" action="{% url 'users:logout' %}">
-                    {% csrf_token %}
-                    <button type="submit" class="users-button users-button-danger">
-                        Log Out
-                    </button>
-                </form>
-            </div>
-
-            <div class="users-card users-settings-card">
-                <h2 class="users-section-title">Recent Bookings</h2>
-
-                {% if recent_bookings %}
-                    <ul class="users-list">
-                        {% for booking in recent_bookings %}
-                            <li>
-                                Booking #{{ booking.pk }} —
-                                {{ booking.get_status_display }} —
-                                {{ booking.total_amount }}
-
-                                <p>
-                                    <a class="users-text-link"
-                                       href="{% url 'bookings:booking-detail' pk=booking.pk %}">
-                                        View Booking
-                                    </a>
-                                </p>
-                            </li>
-                        {% endfor %}
-                    </ul>
-
-                    <a class="users-text-link" href="{% url 'bookings:booking-list' %}">
-                        View All My Bookings
-                    </a>
-                {% else %}
-                    <p>You have no bookings yet.</p>
-                {% endif %}
-            </div>
-
-            <div class="users-card users-settings-card">
-                <h2 class="users-section-title">Recent Payments</h2>
-
-                {% if recent_payments %}
-                    <ul class="users-list">
-                        {% for payment in recent_payments %}
-                            <li>
-                                {{ payment.get_status_display }} —
-                                {{ payment.amount_paid }} —
-                                {{ payment.payment_date|date:"j M Y, H:i" }}
-
-                                <p>
-                                    <a class="users-text-link"
-                                       href="{% url 'payments:payment_detail' payment_id=payment.pk %}">
-                                        View Payment
-                                    </a>
-                                </p>
-                            </li>
-                        {% endfor %}
-                    </ul>
-
-                    <a class="users-text-link" href="{% url 'payments:payment_list' %}">
-                        View All Payments
-                    </a>
-                {% else %}
-                    <p>No payments to display yet.</p>
-                {% endif %}
-            </div>
-        </aside>
-
-    </div>
+    </div><div class="users-card users-settings-card"><h2 class="users-section-title">Recent payments</h2>
+    {% if recent_payments %}
+        <ul class="users-list">
+            {% for payment in recent_payments %}
+                <li>
+                    {{ payment.get_status_display }} —
+                    {{ payment.amount_paid }} —
+                    {{ payment.payment_date|date:"j M Y, H:i" }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No payments to display yet.</p>
+    {% endif %}</div></aside></div>
 </section>
 {% endblock %}

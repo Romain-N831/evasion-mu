@@ -25,6 +25,7 @@ evasion-mu/
 │
 ├── .gitignore
 └── README.md
+```
 
 Technologies
 - Python 3.11+
@@ -184,3 +185,53 @@ Current setup:
 - Django migrations configured
 - Git/GitHub workflow established
 Database tables and application-specific models will be defined by the team during development.
+
+## Current implemented workflows
+
+- Visitors can browse hotels and activities.
+- Verified customers can register, log in, update their profile, maintain a wishlist, book available activity slots, and view their booking history.
+- Activity booking validates participant limits, future slots, blocked dates, and remaining capacity on the server.
+- Customers can apply valid promo codes. The recorded discount is shown on the booking; usage is counted only after a successful simulated payment.
+- Customers can complete a **demo payment** for a pending booking. No real money is charged and no card details are collected.
+- Customers can request cancellation of their own pending or confirmed bookings. Staff review the request in Django Admin and can set the booking to `Cancelled`.
+- Customers can review an activity only after a completed booking, once per activity. Staff moderate reviews in Django Admin.
+
+## Django Admin
+
+Create an administrator account from `backend/` if needed:
+
+```powershell
+.\venv\Scripts\python.exe manage.py createsuperuser
+```
+
+Start the server and visit `http://127.0.0.1:8000/admin/`.
+
+The built-in admin manages hotels, rooms and availability; activities and slots; bookings; promo codes; simulated payments; reviews; customers; and wishlists. Customer verification codes are deliberately not displayed in the admin.
+
+## Run tests
+
+From `backend/`:
+
+```powershell
+.\venv\Scripts\python.exe manage.py check
+.\venv\Scripts\python.exe manage.py makemigrations --check --dry-run
+.\venv\Scripts\python.exe manage.py test
+```
+
+## Demo-data note
+
+Seeded hotel prices and availability are illustrative project data, not live commercial information. Payments and refunds are simulated for this university project.
+
+## Manual backup
+
+For a PostgreSQL development database, create a manual backup before major demonstrations or data changes:
+
+```powershell
+pg_dump -U postgres -h 127.0.0.1 -p 5433 evasion_db > evasion_db_backup.sql
+```
+
+Restore only into a separate or intentionally chosen database:
+
+```powershell
+psql -U postgres -h 127.0.0.1 -p 5433 evasion_db < evasion_db_backup.sql
+```
